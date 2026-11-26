@@ -67,6 +67,8 @@ td.na{color:var(--tx3);font-weight:400;cursor:default}
 .kv b{font-weight:500;color:var(--tx)}
 .act{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
 .b{font:inherit;font-size:13px;padding:6px 12px;border:.5px solid var(--bd2);border-radius:8px;background:transparent;color:var(--tx);cursor:pointer;text-decoration:none}
+.dt{margin:22px 0 0;border-top:.5px solid var(--bd2);padding-top:10px}
+.dt summary{font-size:15px;font-weight:500;cursor:pointer;padding:6px 0;color:var(--tx)}
 .cmp h4{font-size:13px;font-weight:500;margin:16px 0 6px}
 .li.me{background:var(--acbg)}
 /* search */
@@ -260,7 +262,7 @@ function chips(name,opts,cur,wrap){
   opts.forEach(function(o){h+='<button class="chip'+(o[0]===cur?" on":"")+'" data-v="'+esc(o[0])+'">'+esc(o[1])+"</button>"});
   return h+"</div>";
 }
-var ST={posSrc:"BIO2021",posDim:"ind",posOpt:"전체",dealSrc:"NEUENDORF2023"};
+var ST={posMet:"trans",posDim:"ind",posOpt:"전체",dealSrc:"NEUENDORF2023"};
 try{var sv0=JSON.parse(localStorage.getItem("bl_state")||"{}");for(var k in sv0)ST[k]=sv0[k]}catch(e){}
 function save(){try{localStorage.setItem("bl_state",JSON.stringify(ST))}catch(e){}}
 
@@ -365,62 +367,83 @@ var tmr;function toast(s){var e=$("toast");e.textContent=s;e.style.display="bloc
 /* ---------- views ---------- */
 function vHome(){
   var h='<div class="tiles">';
-  [["pos","rNPV 성공확률","단계 전이율, LOA, 적응증과 모달리티별"],["dur","개발 기간","단계별 소요 기간, 허가 심사 기간"],["deal","L/O 딜 조건","선급금, 마일스톤, 로열티, 딜 규모"],["share","매출 추정","출시 순서별 점유율, 선도자 우위"]].forEach(function(t){h+='<button class="tile" data-go="'+t[0]+'"><b>'+esc(t[1])+"</b><span>"+esc(t[2])+"</span></button>"});
+  [["pos","rNPV 성공확률","문헌별 단계 전이율, LOA, 기간 비교"],["dur","개발 기간","단계별 소요 기간, 허가 심사 기간"],["deal","L/O 딜 조건","선급금, 마일스톤, 로열티, 딜 규모"],["share","매출 추정","출시 순서별 점유율, 선도자 우위"]].forEach(function(t){h+='<button class="tile" data-go="'+t[0]+'"><b>'+esc(t[1])+"</b><span>"+esc(t[2])+"</span></button>"});
   h+='</div><input class="srch" id="hq" type="search" placeholder="직접 검색: 로열티, Phase II 종양" enterkeyhint="search" autocomplete="off">';
   h+='<button class="lnk" data-go="list">그 밖의 통계 전체 목록 (종결 사유, 허가 심사 등) &#8250;</button>';
   h+='<p class="foot" style="margin-top:16px">수록 통계 '+R.length+"건, 문헌 "+Object.keys(S).length+"편. 수치는 각 문헌 원문 값을 옮긴 것이며 원문 PDF는 포함하지 않습니다. 인용 전에 원문으로 확인하십시오. 데이터 기준일 "+esc(DB.built)+".</p>";
   return h;
 }
-function posOpts(src,dim){
+var KO={"Oncology":"종양","Non-oncology":"비종양","Non-Oncology":"비종양","Hematology":"혈액","Neurology":"신경","Psychiatry":"정신","Infectious disease":"감염","Autoimmune":"자가면역","Cardiovascular":"심혈관","Metabolic":"대사","Endocrine":"내분비","Respiratory":"호흡기","Ophthalmology":"안과","Urology":"비뇨","Allergy":"알레르기","Gastroenterology (non-IBD)":"소화기","Gastroenterology":"소화기","Others":"기타","Other":"기타","Solid":"고형암","Solid tumors":"고형암","Hematologic":"혈액암","Hematologic cancers":"혈액암","IO (면역항암)":"면역항암","Rare diseases":"희귀질환","Rare Diseases":"희귀질환","Chronic high prevalence":"만성 고유병","Chronic High Prevalence":"만성 고유병","Preselection biomarkers":"바이오마커 선별","Selection Biomarkers":"바이오마커 선별","No biomarkers":"바이오마커 없음","No Biomarkers":"바이오마커 없음","Small molecule":"저분자","Monoclonal antibody":"단일클론항체","Gene therapy":"유전자치료","Protein":"단백질","Peptide":"펩타이드","Vaccine":"백신","Antisense":"안티센스","Novel":"신규","Off-patent":"특허 만료","Biologic":"바이오의약품","Biosimilar":"바이오시밀러","Anti-infectives":"감염","Alimentary and metabolism":"소화, 대사","Musculoskeletal":"근골격","Nervous system":"신경계"};
+function ko(v){return KO[v]&&!/[가-힣]/.test(v)?KO[v]+" "+v:v}
+function skey(s){s=tr(s).toLowerCase();return s==="selection biomarkers"?"preselection biomarkers":s}
+function bm(r,dim,opt){
+  var ind=F(r,"indication"),mo=tr(F(r,"modality")),sg=tr(F(r,"segment"));
+  if(dim==="ind")return ni(ind)===ni(opt)&&E(mo)&&E(sg);
+  if(ind!=="전체")return false;
+  var sub=!E(mo)?mo:(!E(sg)?sg:"");return sub!==""&&skey(sub)===skey(opt);
+}
+function posOpts(dim){
   var seen={},out=[];
-  [src+"_TRANS",src+"_LOA"].forEach(function(mid){sel(mid).forEach(function(r){
-    var ind=F(r,"indication"),mo=tr(F(r,"modality")),sg=tr(F(r,"segment")),v=null;
-    if(dim==="ind"&&E(mo)&&E(sg))v=ind;
-    else if(dim==="mod"&&!E(mo)&&ind==="전체")v=mo;
-    else if(dim==="seg"&&!E(sg)&&E(mo)&&ind==="전체")v=sg;
-    if(v&&!seen[v]){seen[v]=1;out.push(v)}
+  ["BIO2021_TRANS","BIO2016_TRANS"].forEach(function(mid){sel(mid).forEach(function(r){
+    var ind=F(r,"indication"),mo=tr(F(r,"modality")),sg=tr(F(r,"segment")),v=null,k;
+    if(dim==="ind"&&E(mo)&&E(sg)){v=ind;k=ni(ind)}
+    else if(dim==="mod"&&!E(mo)&&ind==="전체"){v=mo;k=skey(mo)}
+    else if(dim==="seg"&&!E(sg)&&E(mo)&&ind==="전체"){v=sg;k=skey(sg)}
+    if(v&&!seen.hasOwnProperty(k)){seen[k]=1;out.push(v)}
   })});
   out.sort(function(a,b){var o={"전체":0,"Oncology":1};var x=o.hasOwnProperty(a)?o[a]:2,y=o.hasOwnProperty(b)?o[b]:2;return x-y||a.localeCompare(b)});
   return out;
 }
-function pm(r,dim,opt){
-  var ind=F(r,"indication"),mo=tr(F(r,"modality")),sg=tr(F(r,"segment"));
-  if(dim==="ind")return ind===opt&&E(mo)&&E(sg);
-  if(dim==="mod")return mo===opt&&ind==="전체";
-  return sg===opt&&E(mo)&&ind==="전체";
-}
-var KO={"Oncology":"종양","Non-oncology":"비종양","Non-Oncology":"비종양","Hematology":"혈액","Neurology":"신경","Psychiatry":"정신","Infectious disease":"감염","Autoimmune":"자가면역","Cardiovascular":"심혈관","Metabolic":"대사","Endocrine":"내분비","Respiratory":"호흡기","Ophthalmology":"안과","Urology":"비뇨","Allergy":"알레르기","Gastroenterology (non-IBD)":"소화기","Gastroenterology":"소화기","Others":"기타","Other":"기타","Solid":"고형암","Solid tumors":"고형암","Hematologic":"혈액암","Hematologic cancers":"혈액암","IO (면역항암)":"면역항암","Rare diseases":"희귀질환","Rare Diseases":"희귀질환","Chronic high prevalence":"만성 고유병","Chronic High Prevalence":"만성 고유병","Preselection biomarkers":"바이오마커 선별","Selection Biomarkers":"바이오마커 선별","No biomarkers":"바이오마커 없음","No Biomarkers":"바이오마커 없음","Small molecule":"저분자","Monoclonal antibody":"단일클론항체","Gene therapy":"유전자치료","Protein":"단백질","Peptide":"펩타이드","Vaccine":"백신","Antisense":"안티센스","Novel":"신규","Off-patent":"특허 만료","Biologic":"바이오의약품","Biosimilar":"바이오시밀러","Anti-infectives":"감염","Alimentary and metabolism":"소화, 대사","Musculoskeletal":"근골격","Nervous system":"신경계"};
-function ko(v){return KO[v]&&!/[가-힣]/.test(v)?KO[v]+" "+v:v}
 function vPos(){
-  var src=ST.posSrc,dim=ST.posDim,opts=posOpts(src,dim);
+  var met=ST.posMet||"trans",dim=ST.posDim,opts=posOpts(dim);
+  if(["ind","mod","seg"].indexOf(dim)<0)dim=ST.posDim="ind";
   if(opts.indexOf(ST.posOpt)<0)ST.posOpt=opts[0];
-  var opt=ST.posOpt;
-  var h='<p class="clab">문헌</p>'+chips("posSrc",[["BIO2021","BIO 2021 (2011-2020)"],["BIO2016","BIO 2016 (2006-2015)"]],src);
-  h+='<p class="clab">구분 기준</p>'+chips("posDim",[["ind","적응증"],["mod","모달리티"],["seg","특성"]],dim);
+  var opt=ST.posOpt,all=(dim==="ind"&&ni(opt)==="");
+  var h='<p class="clab">지표</p>'+chips("posMet",[["trans","단계 전이율"],["loa","LOA (승인 확률)"],["dur","소요 기간"]],met);
+  h+='<p class="clab">조건</p>'+chips("posDim",[["ind","적응증"],["mod","모달리티"],["seg","특성"]],dim);
   h+=chips("posOpt",opts.map(function(o){return[o,ko(o)]}),opt);
-  var rows=[],durTot=null;
-  [["Phase I","I"],["Phase II","II"],["Phase III","III"],["NDA/BLA","N"]].forEach(function(x){
-    var s=PST[x[1]];
-    var t=one(src+"_TRANS",function(r){return F(r,"stage")===s[0]&&pm(r,dim,opt)});
-    var l=s[1]?one(src+"_LOA",function(r){return F(r,"stage")===s[1]&&pm(r,dim,opt)}):null;
-    var d=null;
-    if(dim==="ind"){
-      if(src==="BIO2021")d=one("BIO2021_DURATION",function(r){return F(r,"stage")===s[0]&&ni(F(r,"indication"))===ni(opt)});
-      else if(x[1]==="N")d=one("BIO2016_REVIEW_TIME",function(r){return ni(F(r,"indication"))===ni(opt)});
-    }
-    rows.push([x[0]+(x[1]==="N"?"":" 진입"),cell(t,"trans:"+x[1],{n:1}),s[1]?cell(l,"loa:"+x[1],{n:1}):'<td class="v na">-</td>',cell(d,"dur:"+x[1])]);
-  });
-  if(src==="BIO2021"&&dim==="ind")durTot=one("BIO2021_DURATION",function(r){return F(r,"stage")==="Phase I->Approval"&&ni(F(r,"indication"))===ni(opt)});
-  var cap=(src==="BIO2021"?"BIO, Informa, QLS 2021":"BIO, Biomedtracker, Amplion 2016")+". 전이율은 다음 단계 진입 확률, LOA는 해당 단계 시작부터 승인까지 확률입니다.";
-  h+=sec(ko(opt),cap,tbl(["단계","전이율","LOA","기간(년)"],rows),(durTot?"Phase I부터 승인까지 총 "+sv(durTot)+"년. ":"")+(src==="BIO2016"?"BIO 2016은 단계별 기간을 제공하지 않으며 NDA/BLA 기간은 허가 심사 기간입니다. ":dim!=="ind"?"기간은 적응증 기준으로만 제공됩니다. ":"")+"칸을 누르면 출처와 다른 문헌 값을 볼 수 있습니다.");
-  var pr=[];
+  function b(mid,st){return one(mid,function(r){return F(r,"stage")===st&&bm(r,dim,opt)})}
+  var head,rows=[],foot;
+  var STG4=[["Phase I","I"],["Phase II","II"],["Phase III","III"],["NDA/BLA","N"]];
+  if(met==="trans"){
+    head=["단계","BIO 21","BIO 16","Paul","CMR"];
+    STG4.forEach(function(x){var s=PST[x[1]],c="trans:"+x[1];
+      rows.push([x[0],cell(b("BIO2021_TRANS",s[0]),c,{n:1}),cell(b("BIO2016_TRANS",s[0]),c,{n:1}),
+        cell(all?one("PAUL_PTS",stg(s[2])):null,c),
+        cell(all&&x[1]!=="N"?one("MORGAN_STAGE_SUCCESS",function(r){return F(r,"stage")===s[2]&&F(r,"segment")==="업계(CMR)"&&F(r,"period")==="2013-2015"}):null,c)]);
+    });
+    foot="BIO 21은 BIO 2021(2011-2020), BIO 16은 BIO 2016(2006-2015) 관측값입니다. Paul은 Paul 2010 모델 가정치, CMR은 Morgan 2018에 실린 업계 값(2013-2015, PDM 정의)입니다. Paul과 CMR은 전체 적응증 값만 있습니다.";
+  }else if(met==="loa"){
+    head=["단계","BIO 21","BIO 16","Dowden","Paul"];
+    STG4.slice(0,3).forEach(function(x){var s=PST[x[1]],c="loa:"+x[1],dw=null;
+      if(all)dw=one("DOWDEN_PROGRESSION",function(r){return F(r,"stage")===s[3]&&F(r,"period")==="2015-2017"});
+      else if(dim==="ind")dw=one("DOWDEN_AREA",function(r){return F(r,"stage")===s[3]&&ni(F(r,"indication"))===ni(opt)});
+      rows.push([x[0],cell(b("BIO2021_LOA",s[1]),c,{n:1}),cell(b("BIO2016_LOA",s[1]),c,{n:1}),cell(dw,c),cell(all?one("PAUL_CUM",function(r){return F(r,"stage")===s[3]&&E(F(r,"modality"))}):null,c)]);
+    });
+    foot="BIO는 해당 단계 시작부터 승인까지, Dowden과 Paul은 출시까지의 확률입니다. Dowden은 전체 적응증이면 2015-2017 구간 값, 적응증을 고르면 치료영역별 값(2010-2017, 7개 영역)입니다. Paul은 모델 가정치의 누적 확률입니다.";
+  }else{
+    head=["단계","BIO 21","Paul","BIO 16"];
+    STG4.concat([["I부터 승인","T"]]).forEach(function(x){var s=PST[x[1]],c="dur:"+x[1];
+      var d21=dim==="ind"?one("BIO2021_DURATION",function(r){return F(r,"stage")===(x[1]==="T"?"Phase I->Approval":s[0])&&ni(F(r,"indication"))===ni(opt)}):null;
+      var pl=all&&s?one("PAUL_CYCLE",stg(s[2])):null;
+      var d16=dim==="ind"&&x[1]==="N"?one("BIO2016_REVIEW_TIME",function(r){return ni(F(r,"indication"))===ni(opt)}):null;
+      rows.push([x[0],cell(d21,c,{n:1}),cell(pl,c),cell(d16,c)]);
+    });
+    foot="단위 년. BIO 21은 단계 시작부터 다음 단계 진입까지 관측 기간, Paul은 모델 사이클타임, BIO 16은 허가 심사 기간(NDA/BLA 제출부터 승인)만 있습니다. 기간 값은 적응증 기준으로만 제공됩니다.";
+  }
+  h+=sec(ko(opt)+" 문헌별 비교","문헌마다 정의와 모집단이 다릅니다. 칸을 누르면 정의, 출처, 같은 조건의 다른 값을 볼 수 있습니다.",tbl(head,rows),foot+" "+STAR);
+  h+='<details class="dt"><summary>문헌별 상세 표</summary>'+posDetail()+"</details>";
+  return h;
+}
+function posDetail(){
+  var h="",pr=[];
   [["Preclinical",""],["Phase I","I"],["Phase II","II"],["Phase III","III"],["Submission-to-launch","N"]].forEach(function(x){
     var p=one("PAUL_PTS",stg(x[0])),lo=(BYM.PAUL_PTS||[]).filter(function(r){return F(r,"stage")===x[0]&&F(r,"stat_type")==="sens_low"})[0],hi=(BYM.PAUL_PTS||[]).filter(function(r){return F(r,"stage")===x[0]&&F(r,"stat_type")==="sens_high"})[0];
     pr.push([x[0]==="Submission-to-launch"?"허가 제출":x[0],cell(p,x[1]?"trans:"+x[1]:""),'<td class="v na">'+(lo&&hi?esc(sv(lo))+" ~ "+esc(sv(hi)):"-")+"</td>",cell(one("PAUL_CYCLE",stg(x[0])),x[1]?"dur:"+x[1]:"")]);
   });
-  h+=sec("Paul 2010 모델 가정치","PBF 13개 대형 제약사 벤치마크와 Lilly 자료를 바탕으로 한 R&D 경제성 모델의 가정값입니다. 관측 통계가 아니므로 BIO 값과 구분해 쓰십시오.",tbl(["단계","p(TS)","민감도 범위","기간(년)"],pr));
+  h+=sec("Paul 2010 모델 가정치","PBF 13개 대형 제약사 벤치마크와 Lilly 자료를 바탕으로 한 R&D 경제성 모델의 가정값입니다.",tbl(["단계","p(TS)","민감도 범위","기간(년)"],pr));
   var ar=sel("DOWDEN_AREA",stg("Phase I->Launch")).map(function(r){var a=F(r,"indication");return[ko(a==="Anticancer"?"Oncology":a),cell(r,"loa:I"),cell(one("DOWDEN_AREA",function(x){return F(x,"indication")===a&&F(x,"stage")==="Phase II->Launch"}),"loa:II"),cell(one("DOWDEN_AREA",function(x){return F(x,"indication")===a&&F(x,"stage")==="Phase III->Launch"}),"loa:III")]});
-  h+=sec("Dowden 2019 치료영역별 출시 확률","CMR International PDM 기준, 2010-2017. 정의와 치료영역 분류가 BIO와 다릅니다.",tbl(["치료영역","I→출시","II→출시","III→출시"],ar));
+  h+=sec("Dowden 2019 치료영역별 출시 확률","CMR International PDM 기준, 2010-2017.",tbl(["치료영역","I→출시","II→출시","III→출시"],ar));
   var per=[];sel("DOWDEN_PROGRESSION",stg("Phase I->Launch")).forEach(function(r){per.push(F(r,"period"))});
   h+=sec("Dowden 2019 기간별 단계 성공률","3년 이동 구간별 전체 적응증 값입니다.",tbl(["기간","I→출시","II→III","II→출시","III→출시"],per.map(function(p){function g(s){return one("DOWDEN_PROGRESSION",function(r){return F(r,"stage")===s&&F(r,"period")===p})}return[p,cell(g("Phase I->Launch"),"loa:I"),cell(g("Phase II->Phase III"),"trans:II"),cell(g("Phase II->Launch"),"loa:II"),cell(g("Phase III->Launch"),"loa:III")]})));
   var az=[];
@@ -429,7 +452,7 @@ function vPos(){
     var c=x[1]?"trans:"+x[1]:"";
     az.push([x[0],cell(mg("AstraZeneca","2005-2010"),c),cell(mg("AstraZeneca","2012-2016"),c),cell(mg("업계(CMR)","2013-2015"),c),cell(one("COOK_STAGE_SUCCESS",function(r){return F(r,"stage")===x[0]&&F(r,"segment")==="업계 중앙값(PBF)"}),c)]);
   });
-  h+=sec("AstraZeneca 대 업계 (Morgan 2018, Cook 2014)","단계별 프로젝트 성공률입니다. 업계 값은 CMR(2013-2015)과 PBF 중앙값(2005-2010)입니다.",tbl(["단계","AZ 05-10","AZ 12-16","CMR 13-15","PBF 05-10"],az),STAR);
+  h+=sec("AstraZeneca 대 업계 (Morgan 2018, Cook 2014)","단계별 프로젝트 성공률입니다.",tbl(["단계","AZ 05-10","AZ 12-16","CMR 13-15","PBF 05-10"],az));
   return h;
 }
 function vDur(){
@@ -602,7 +625,7 @@ $("back").addEventListener("click",function(){if(history.length>1)history.back()
 $("view").addEventListener("click",function(e){
   var t=e.target,b;
   b=t.closest("[data-go]");if(b){location.hash=b.getAttribute("data-go");return}
-  b=t.closest(".chip");if(b){var g=b.parentNode.getAttribute("data-chip");ST[g]=b.getAttribute("data-v");if(g==="posSrc"||g==="posDim")ST.posOpt="";save();rerender();return}
+  b=t.closest(".chip");if(b){var g=b.parentNode.getAttribute("data-chip");ST[g]=b.getAttribute("data-v");if(g==="posDim")ST.posOpt="";save();rerender();return}
   b=t.closest("[data-fam]");if(b){SQ={q:"",f:b.getAttribute("data-fam"),sc:"",og:false};location.hash="search";return}
   b=t.closest("[data-more]");if(b){var k=b.getAttribute("data-more");shown[k]=(shown[k]||8)+30;render();return}
   b=t.closest("[data-id]");if(b){openSheet(b.getAttribute("data-id"),b.getAttribute("data-ck"));return}
