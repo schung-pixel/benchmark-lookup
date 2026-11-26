@@ -9,69 +9,86 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>벤치마크 조회</title>
 <style>
-:root{--bg:#f5f4ee;--card:#fff;--tx:#1f1f1e;--tx2:#5f5e5a;--tx3:#888780;--bd:rgba(0,0,0,.1);--bd2:rgba(0,0,0,.22);--ac:#185fa5;--acbg:#e6f1fb;--wn:#854f0b;--wnbg:#faeeda;--ok:#3b6d11}
-@media(prefers-color-scheme:dark){:root{--bg:#191919;--card:#262624;--tx:#ececea;--tx2:#a9a8a2;--tx3:#807f79;--bd:rgba(255,255,255,.1);--bd2:rgba(255,255,255,.24);--ac:#85b7eb;--acbg:#0c447c;--wn:#fac775;--wnbg:#412402;--ok:#97c459}}
+:root{--bg:#f5f4ee;--card:#fff;--tx:#1f1f1e;--tx2:#5f5e5a;--tx3:#888780;--bd:rgba(0,0,0,.1);--bd2:rgba(0,0,0,.22);--ac:#185fa5;--acbg:#e6f1fb;--wn:#854f0b;--wnbg:#faeeda;--hl:#f1efe8}
+@media(prefers-color-scheme:dark){:root{--bg:#191919;--card:#262624;--tx:#ececea;--tx2:#a9a8a2;--tx3:#807f79;--bd:rgba(255,255,255,.1);--bd2:rgba(255,255,255,.24);--ac:#85b7eb;--acbg:#0c447c;--wn:#fac775;--wnbg:#412402;--hl:#30302e}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 -apple-system,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;-webkit-text-size-adjust:100%}
-.wrap{max-width:760px;margin:0 auto;padding:12px 12px calc(40px + env(safe-area-inset-bottom))}
-header{padding:10px 0 4px}
-.sq{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
-h1{font-size:17px;font-weight:500;margin:0 0 8px}
-#q{width:100%;height:42px;border:.5px solid var(--bd2);border-radius:10px;padding:0 12px;font-size:16px;background:var(--card);color:var(--tx)}
-#q:focus{outline:2px solid var(--ac);outline-offset:0}
-.bar{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
-select{flex:1;min-width:0;height:34px;border:.5px solid var(--bd2);border-radius:8px;background:var(--card);color:var(--tx);font-size:13px;padding:0 6px;max-width:100%}
-label.tg{font-size:13px;color:var(--tx2);display:flex;gap:6px;align-items:center}
-.chips{margin:8px 0 0}
-.chip{display:inline-block;font-size:13px;padding:5px 11px;border:.5px solid var(--bd2);border-radius:999px;margin:0 6px 6px 0;color:var(--tx2);background:transparent;cursor:pointer}
+body.lock{overflow:hidden}
+.wrap{max-width:760px;margin:0 auto;padding:0 12px calc(40px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:6px;padding:12px 0 8px;min-height:52px}
+header h1{font-size:17px;font-weight:500;margin:0;flex:1}
+#back{display:none;border:0;background:transparent;color:var(--tx);font-size:22px;line-height:1;padding:4px 8px 4px 0;cursor:pointer}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:4px 0 14px}
+.tile{display:block;text-align:left;background:var(--card);border:.5px solid var(--bd);border-radius:12px;padding:14px 12px;color:var(--tx);cursor:pointer;font:inherit;min-height:92px}
+.tile b{display:block;font-size:15px;font-weight:500;margin-bottom:4px}
+.tile span{font-size:12px;color:var(--tx2);line-height:1.45}
+.srch{width:100%;height:44px;border:.5px solid var(--bd2);border-radius:10px;padding:0 12px;font-size:16px;background:var(--card);color:var(--tx)}
+.srch:focus{outline:2px solid var(--ac);outline-offset:0}
+.lnk{display:block;width:100%;text-align:left;margin:10px 0 0;padding:12px;background:transparent;border:.5px solid var(--bd2);border-radius:10px;color:var(--tx);font:inherit;font-size:14px;cursor:pointer}
+.chips{margin:2px 0 4px;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrapc{flex-wrap:wrap;overflow:visible}
+.chip{flex:none;font:inherit;font-size:13px;padding:6px 12px;border:.5px solid var(--bd2);border-radius:999px;color:var(--tx2);background:transparent;cursor:pointer;white-space:nowrap}
 .chip.on{background:var(--acbg);color:var(--ac);border-color:var(--ac)}
-.sum{font-size:13px;color:var(--tx2);margin:6px 0 10px}
-.warn{background:var(--wnbg);color:var(--wn);border-radius:10px;padding:8px 12px;font-size:13px;margin:0 0 10px}
+.clab{font-size:12px;color:var(--tx3);margin:8px 0 2px}
+.sec{margin:18px 0 0}
+.sec h2{font-size:15px;font-weight:500;margin:0 0 2px}
+.cap{font-size:12px;color:var(--tx2);margin:0 0 8px;line-height:1.5}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:.5px solid var(--bd);border-radius:12px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-weight:500;font-size:12px;text-align:left;color:var(--tx2);padding:8px 8px 6px;border-bottom:.5px solid var(--bd2);white-space:nowrap}
+th.v{text-align:right}
+td{padding:9px 8px;border-bottom:.5px solid var(--bd);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.rl{font-size:13px;min-width:92px}
+td.v{text-align:right;font-weight:500;white-space:nowrap;cursor:pointer}
+td.v:active{background:var(--hl)}
+td.v small{display:block;font-size:11px;font-weight:400;color:var(--tx3)}
+td.v sup{color:var(--wn);font-weight:400}
+td.na{color:var(--tx3);font-weight:400;cursor:default}
+.foot{font-size:12px;color:var(--tx3);margin:6px 2px 0;line-height:1.5}
+.lst{background:var(--card);border:.5px solid var(--bd);border-radius:12px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border-bottom:.5px solid var(--bd);cursor:pointer;font-size:14px}
+.li:last-child{border-bottom:0}
+.li .r{text-align:right;white-space:nowrap;font-weight:500}
+.li small{display:block;font-size:12px;color:var(--tx2);font-weight:400}
+.bd{display:inline-block;font-size:11px;padding:1px 7px;border:.5px solid var(--bd2);border-radius:6px;color:var(--tx2);white-space:nowrap;font-weight:400}
+.bd.es{color:var(--wn);border-color:var(--wn)}
+.warn{background:var(--wnbg);color:var(--wn);border-radius:10px;padding:8px 12px;font-size:13px;margin:8px 0}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
+#sheet{display:none;position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:86vh;overflow-y:auto;background:var(--bg);border-radius:16px 16px 0 0;padding:6px 14px calc(24px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto}
+.open #ov,.open #sheet{display:block}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--bd2);margin:4px auto 8px}
+.sh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.sh-top h3{font-size:14px;font-weight:500;margin:0;color:var(--tx2)}
+.x{border:0;background:transparent;color:var(--tx2);font-size:22px;line-height:1;padding:0 2px;cursor:pointer}
+.big{font-size:30px;font-weight:500;line-height:1.15;margin:4px 0 2px}
+.kv{font-size:13px;color:var(--tx2);margin:2px 0}
+.kv b{font-weight:500;color:var(--tx)}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.b{font:inherit;font-size:13px;padding:6px 12px;border:.5px solid var(--bd2);border-radius:8px;background:transparent;color:var(--tx);cursor:pointer;text-decoration:none}
+.cmp h4{font-size:13px;font-weight:500;margin:16px 0 6px}
+.li.me{background:var(--acbg)}
+/* search */
+.bar{display:flex;gap:8px;margin-top:8px;align-items:center}
+select{flex:1;min-width:0;height:36px;border:.5px solid var(--bd2);border-radius:8px;background:var(--card);color:var(--tx);font-size:13px;padding:0 6px}
+label.tg{font-size:13px;color:var(--tx2);display:flex;gap:6px;align-items:center;white-space:nowrap}
+.sum{font-size:13px;color:var(--tx2);margin:10px 0}
 .grp{margin:0 0 18px}
-.gh{padding:0 2px 6px}
 .gh b{font-weight:500;font-size:15px}
 .gh .df{font-size:12px;color:var(--tx2);margin-top:2px}
 .gh .cn{font-size:12px;color:var(--wn);margin-top:2px}
-.card{background:var(--card);border:.5px solid var(--bd);border-radius:12px;padding:10px 12px;margin:0 0 8px}
-.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.val{font-size:26px;font-weight:500;line-height:1.15}
-.bd{font-size:11px;padding:2px 8px;border:.5px solid var(--bd2);border-radius:6px;color:var(--tx2);white-space:nowrap}
-.bd.es{color:var(--wn);border-color:var(--wn)}
-.lbl{font-size:14px;font-weight:500;margin-top:2px}
-.sub{font-size:12px;color:var(--tx2);margin-top:1px}
-.det{display:none;border-top:.5px solid var(--bd);margin-top:8px;padding-top:8px;font-size:12px;color:var(--tx2)}
-.card.open .det{display:block}
-.det p{margin:0 0 4px}
-.act{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-button.b,a.b{font-size:12px;padding:5px 10px;border:.5px solid var(--bd2);border-radius:8px;background:transparent;color:var(--tx);cursor:pointer;text-decoration:none}
-.more{width:100%;margin:2px 0 6px;padding:8px;font-size:13px}
-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border:.5px solid var(--bd);border-radius:10px;overflow:hidden}
-th{font-weight:500;text-align:left;color:var(--tx2);padding:7px 8px;border-bottom:.5px solid var(--bd2);white-space:nowrap}
-td{padding:7px 8px;border-bottom:.5px solid var(--bd);vertical-align:top}
-tr:last-child td{border-bottom:0}
-td.n{text-align:right;white-space:nowrap;font-weight:500}
-.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .empty{text-align:center;color:var(--tx2);padding:36px 12px;font-size:14px}
-footer{font-size:12px;color:var(--tx3);margin-top:24px;line-height:1.6}
-.ex{display:block;width:100%;text-align:left;padding:10px 12px;margin:0 0 6px;background:var(--card);border:.5px solid var(--bd);border-radius:10px;color:var(--tx);font-size:14px;cursor:pointer}
-.ex small{display:block;color:var(--tx2);font-size:12px}
-#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;display:none;z-index:9}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;display:none;z-index:30}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-<h1>벤치마크 조회</h1>
-<div class="sq"><input id="q" type="search" placeholder="Phase II 성공확률 종양" autocomplete="off" enterkeyhint="search"></div>
-<div class="bar">
-<select id="fam" aria-label="지표 분류"><option value="">분류 전체</option></select>
-<select id="src" aria-label="출처 문헌"><option value="">문헌 전체</option></select>
-<label class="tg"><input type="checkbox" id="orig"> 원문값만</label>
+<header><button id="back" aria-label="뒤로">&#8249;</button><h1 id="ttl">벤치마크 조회</h1></header>
+<main id="view"></main>
 </div>
-</header>
-<div id="out"></div>
-<footer id="foot"></footer>
-</div>
+<div id="ov"></div>
+<div id="sheet" role="dialog" aria-modal="true"></div>
 <div id="toast"></div>
 <script src="data.js"></script>
 <script>
@@ -80,6 +97,7 @@ var DB=window.DB,C={};DB.cols.forEach(function(c,i){C[c]=i});
 var R=DB.rows,S=DB.sources,M=DB.metrics;
 var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function F(r,k){return r[C[k]]}
 var ROM={"1":"i","2":"ii","3":"iii","4":"iv"};
 var G=[
 ["성공확률","성공률","success rate","probability of success","success probability","loa","likelihood of approval","승인확률","승인 확률"],
@@ -148,7 +166,7 @@ var MW=[];G.forEach(function(g){g.forEach(function(t){if(t.indexOf(" ")>-1&&MW.i
 MW.sort(function(x,y){return y.length-x.length});
 var STG=/^phase(?:\s*)(i{1,3}|iv|[1-4])$/;
 var AL={"p1":"phase i","1상":"phase i","임상1상":"phase i","ph1":"phase i","p2":"phase ii","2상":"phase ii","임상2상":"phase ii","ph2":"phase ii","p3":"phase iii","3상":"phase iii","임상3상":"phase iii","ph3":"phase iii","nda":"nda/bla","bla":"nda/bla"};
-function tokenize(q){
+function tokenize0(q){
   q=q.toLowerCase().replace(/phase\s+(i{1,3}|iv|\d)(?![a-z])/g,"phase$1");
   MW.forEach(function(t){if(q.indexOf(t)>-1)q=q.split(t).join(t.replace(/ /g,"_"))});
   return q.split(/\s+/).filter(function(x){return x&&!STOP[x]}).map(function(x){x=x.replace(/_/g," ");return(x.length>2&&/[가-힣]별$/.test(x))?x.slice(0,-1):x}).filter(function(x){return!STOP[x]});
@@ -202,19 +220,309 @@ function full(r){
   a.push(cite(r));a.push(r[C.nature]);
   return a.join(", ");
 }
-var fams=[],famN={};
-Object.keys(M).forEach(function(k){var f=M[k].family;if(f&&fams.indexOf(f)<0)fams.push(f)});
-R.forEach(function(r){var f=(M[r[C.metric_id]]||{}).family;famN[f]=(famN[f]||0)+1});
-fams.sort();
-fams.forEach(function(f){if(famN[f]){var o=document.createElement("option");o.value=f;o.textContent=f+" ("+famN[f]+")";$("fam").appendChild(o)}});
-Object.keys(S).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=S[k].authors+" "+S[k].year;$("src").appendChild(o)});
+function tokenize(q){var t=tokenize0(q);var ph=t.some(function(x){return STG.test(x)||AL[x]});return ph?t.filter(function(x){return x!=="임상"&&x!=="clinical"}):t}
+function natS(n){if(isOrig(n))return"원문값";var m=n.match(/^원문값\((.*)\)$/);return m?m[1]:n.replace(/\(.*$/,"")}
 
-var openState={},tableState={},shown={};
+var SHORT={PAUL2010:"Paul 2010",COOK2014:"Cook 2014",WARING2015:"Waring 2015",MORGAN2018:"Morgan 2018",DOWDEN2019:"Dowden 2019",BIO2016:"BIO 2016",BIO2021:"BIO 2021",MCK2014:"McKinsey 2014",RIDLEY2015:"Ridley 2015",BTG2020:"Biotechgate 2020",PULLAN2019:"Pullan 2019",NEUENDORF2023:"Neuendorf 2023",TRIGEORGIS2023:"Trigeorgis 2023"};
+function sname(r){var k=F(r,"source_id");return SHORT[k]||((S[k]||{}).authors+" "+(S[k]||{}).year)}
+var BYM={},BYID={};
+R.forEach(function(r){(BYM[F(r,"metric_id")]=BYM[F(r,"metric_id")]||[]).push(r);BYID[F(r,"stat_id")]=r});
+function pt(r){var t=F(r,"stat_type");return t==="point"||t==="mean"||t===""}
+function sel(mid,fn){return(BYM[mid]||[]).filter(function(r){return pt(r)&&(!fn||fn(r))})}
+function one(mid,fn){return sel(mid,fn)[0]||null}
+function tr(s){return String(s||"").trim()}
+function E(s){s=tr(s);return s===""||s==="전체"}
+function sv(r){
+  var ap=F(r,"as_published"),nat=F(r,"nature"),u=F(r,"unit"),x=parseFloat(F(r,"value"));
+  if(ap&&nat.indexOf("파생")<0)return ap.replace(/\s*(USD m|USD bn|년|분기)$/,"");
+  if(isNaN(x))return"-";
+  if(u==="fraction")return(Math.round(x*1000)/10)+"%";
+  if(u==="배")return x.toFixed(2)+"배";
+  return String(+x.toPrecision(4));
+}
+function nf(n){var x=Number(n);return n!==""&&!isNaN(x)?x.toLocaleString("en-US"):n}
+function cell(r,ck,o){
+  if(!r)return'<td class="v na">-</td>';
+  var es=!isOrig(F(r,"nature"));
+  return'<td class="v" data-id="'+esc(F(r,"stat_id"))+'" data-ck="'+esc(ck||"")+'">'+esc(sv(r))+(es?"<sup>*</sup>":"")+(o&&o.n&&F(r,"n")?"<small>n="+esc(nf(F(r,"n")))+"</small>":"")+"</td>";
+}
+function tbl(head,body){
+  var h='<div class="tw"><table><thead><tr>';
+  head.forEach(function(x,i){h+="<th"+(i?' class="v"':"")+">"+esc(x)+"</th>"});
+  h+="</tr></thead><tbody>";
+  body.forEach(function(b){h+='<tr><td class="rl">'+esc(b[0])+"</td>"+b.slice(1).join("")+"</tr>"});
+  return h+"</tbody></table></div>";
+}
+function sec(t,cap,inner,foot){return'<section class="sec"><h2>'+esc(t)+"</h2>"+(cap?'<p class="cap">'+esc(cap)+"</p>":"")+inner+(foot?'<p class="foot">'+esc(foot)+"</p>":"")+"</section>"}
+var STAR="* 원문 표기값이 아닌 값(모델 가정치, 그래프 판독 추정, 파생 계산)입니다. 칸을 누르면 출처와 다른 문헌 값이 나옵니다.";
+function chips(name,opts,cur,wrap){
+  var h='<div class="chips'+(wrap?" wrapc":"")+'" data-chip="'+name+'">';
+  opts.forEach(function(o){h+='<button class="chip'+(o[0]===cur?" on":"")+'" data-v="'+esc(o[0])+'">'+esc(o[1])+"</button>"});
+  return h+"</div>";
+}
+var ST={posSrc:"BIO2021",posDim:"ind",posOpt:"전체",dealSrc:"NEUENDORF2023"};
+try{var sv0=JSON.parse(localStorage.getItem("bl_state")||"{}");for(var k in sv0)ST[k]=sv0[k]}catch(e){}
+function save(){try{localStorage.setItem("bl_state",JSON.stringify(ST))}catch(e){}}
+
+var IMAP={"others":"other","anticancer":"oncology","anti-infectives":"infectious disease","infectious diseases":"infectious disease","cardiology":"cardiovascular","endocrinology":"endocrine","solid tumors":"solid","hematologic cancers":"hematologic","gastroenterology (non-ibd)":"gastroenterology","전체":""};
+function ni(s){s=tr(s).toLowerCase();return IMAP.hasOwnProperty(s)?IMAP[s]:s}
+function isBio(r){return/^BIO20/.test(F(r,"source_id"))}
+function ck(r){
+  var sub="";
+  if(isBio(r)){var m=tr(F(r,"modality")),g=tr(F(r,"segment"));sub=(!E(m)?m:(!E(g)?g:"")).toLowerCase();if(sub==="selection biomarkers")sub="preselection biomarkers"}
+  else if(F(r,"metric_id")==="DOWDEN_LATE")sub=F(r,"segment")==="희귀질환"?"rare diseases":"non-rare";
+  return ni(F(r,"indication"))+"|"+sub;
+}
+var PST={I:["Phase I->Phase II","Phase I->Approval","Phase I","Phase I->Launch"],II:["Phase II->Phase III","Phase II->Approval","Phase II","Phase II->Launch"],III:["Phase III->NDA/BLA","Phase III->Approval","Phase III","Phase III->Launch"],N:["NDA/BLA->Approval","","Submission-to-launch",""]};
+function stg(v){return function(r){return F(r,"stage")===v}}
+function cands(key){
+  var p=key.split(":"),t=p[0],k=p[1],a=[];
+  function add(mid,fn){a=a.concat(sel(mid,fn))}
+  var s=PST[k];
+  if(t==="trans"&&s){
+    add("BIO2021_TRANS",stg(s[0]));add("BIO2016_TRANS",stg(s[0]));
+    add("PAUL_PTS",stg(s[2]));
+    if(k!=="N"){add("MORGAN_STAGE_SUCCESS",stg(s[2]));add("COOK_STAGE_SUCCESS",stg(s[2]))}
+    if(k==="I"||k==="II")add("COOK_BACKUP",function(r){return F(r,"stage")===s[2]&&F(r,"segment")==="전체 후보"});
+    if(k==="II")add("DOWDEN_PROGRESSION",stg("Phase II->Phase III"));
+    if(k==="N")add("BIO2016_REVIEW",function(r){return F(r,"segment")==="최종 승인"});
+  }else if(t==="loa"&&s&&s[1]){
+    add("BIO2021_LOA",stg(s[1]));add("BIO2016_LOA",stg(s[1]));
+    add("DOWDEN_PROGRESSION",stg(s[3]));add("DOWDEN_AREA",stg(s[3]));add("PAUL_CUM",stg(s[3]));
+    if(k==="III")add("DOWDEN_LATE",stg(s[3]));
+  }else if(t==="dur"){
+    if(k==="T"){add("BIO2021_DURATION",stg("Phase I->Approval"))}
+    else if(s){add("BIO2021_DURATION",stg(s[0]));add("PAUL_CYCLE",stg(s[2]));if(k==="N")add("BIO2016_REVIEW_TIME")}
+  }else if(t==="up"||t==="tot"||t==="ush"||t==="roy"){
+    var mids={up:[["NEU_AVG_PAYMENT","Upfront"],["BTG_AVG_UPFRONT"],["TRI_MEDIAN_UPFRONT"],["PULLAN_UPFRONT"]],tot:[["NEU_AVG_PAYMENT","Total deal"],["BTG_AVG_DEALVALUE"]],ush:[["NEU_COMPOSITION","Upfront"],["BTG_UPFRONT_SHARE"]],roy:[["TRI_MEDIAN_ROYALTY"]]}[t];
+    mids.forEach(function(m){add(m[0],function(r){return dn(F(r,"stage"))===k&&(!m[1]||F(r,"segment")===m[1])})});
+    if(t==="roy")add("BTG_ROYALTY");
+  }else if(t==="shr"){
+    add("MCK_SHARE10",function(r){return ord(r)===k});add("RIDLEY_PEAK",function(r){return ord(r)===k&&/피크/.test(F(r,"segment"))});add("RIDLEY_PRED",function(r){return ord(r)===k});
+  }else if(t==="adv"){add("MCK_ADV",function(r){return ord(r)===k})}
+  return a;
+}
+function dn(s){s=tr(s);if(s==="Marketed"||s==="Approval")return"승인 또는 시판";if(s==="Pre-Clinical")return"Preclinical";return s}
+function ord(r){var m=F(r,"segment").match(/(\d)번째/);return m?m[1]:(/^전체/.test(F(r,"segment"))?"all":"")}
+function cmpHtml(key,r0){
+  if(!key)return"";
+  var a=cands(key),seen={},me=F(r0,"stat_id");
+  a=a.filter(function(r){var k=F(r,"metric_id")+"|"+ck(r)+"|"+F(r,"stage")+"|"+(E(F(r,"segment"))?"":tr(F(r,"segment")))+"|"+F(r,"period")+"|"+F(r,"value");if(seen[k])return false;seen[k]=1;return true});
+  var kt=key.split(":")[0],grpd=(kt==="trans"||kt==="loa"||kt==="dur");
+  var groups=[];
+  if(grpd){
+    var k0=ck(r0);
+    var g1=a.filter(function(r){return ck(r)===k0}),g2=k0!=="|"?a.filter(function(r){return ck(r)==="|"}):[];
+    groups.push(["같은 조건의 다른 문헌 값",g1]);if(g2.length)groups.push(["전체 적응증 기준(참고)",g2]);
+  }else groups.push(["다른 문헌의 같은 통계",a]);
+  var h='<div class="cmp">';
+  groups.forEach(function(g){
+    if(!g[1].length)return;
+    g[1].sort(function(x,y){return(S[F(y,"source_id")]||{}).year-(S[F(x,"source_id")]||{}).year});
+    h+="<h4>"+esc(g[0])+" ("+g[1].length+")</h4><div class=\"lst\">";
+    g[1].forEach(function(r){
+      var es=!isOrig(F(r,"nature")),bits=[F(r,"n")?"n="+nf(F(r,"n")):"",F(r,"period"),F(r,"location")].filter(Boolean).join(", ");
+      h+='<div class="li'+(F(r,"stat_id")===me?" me":"")+'" data-id="'+esc(F(r,"stat_id"))+'" data-ck="'+esc(key)+'"><div><b style="font-weight:500">'+esc(sname(r))+"</b> "+esc(label(r))+"<small>"+esc(bits)+'</small></div><div class="r">'+esc(fmt(r))+'<small><span class="bd'+(es?" es":"")+'">'+esc(natS(F(r,"nature")))+"</span></small></div></div>";
+    });
+    h+="</div>";
+  });
+  var ms={};a.forEach(function(r){ms[F(r,"metric_id")]=1});
+  if(Object.keys(ms).length>1)h+='<div class="warn">문헌마다 정의, 모집단, 기간이 다릅니다. 항목을 눌러 각 값의 정의를 확인한 뒤 비교하십시오.</div>';
+  return h+"</div>";
+}
+var sheetOpen=false;
+function openSheet(id,key,push){
+  var r=BYID[id];if(!r)return;
+  var m=M[F(r,"metric_id")]||{},s=S[F(r,"source_id")]||{},nat=F(r,"nature"),es=!isOrig(nat);
+  var h='<div class="grab"></div><div class="sh-top"><h3>'+esc(m.name_ko||"")+'</h3><button class="x" data-close="1" aria-label="닫기">&times;</button></div>';
+  h+='<div class="big">'+esc(fmt(r))+'</div><div style="font-size:14px;font-weight:500">'+esc(label(r))+' <span class="bd'+(es?" es":"")+'">'+esc(nat)+"</span></div>";
+  if(F(r,"n"))h+='<p class="kv"><b>n</b> '+esc(nf(F(r,"n")))+"</p>";
+  if(F(r,"period"))h+='<p class="kv"><b>기간</b> '+esc(F(r,"period"))+"</p>";
+  if(F(r,"population"))h+='<p class="kv"><b>모집단</b> '+esc(F(r,"population"))+"</p>";
+  h+='<p class="kv"><b>출처</b> '+esc(s.authors)+" ("+esc(s.year)+"). "+esc(s.title)+". "+esc(s.journal_or_publisher)+(F(r,"location")?", "+esc(F(r,"location")):"")+"</p>";
+  if(m.definition)h+='<p class="kv"><b>정의</b> '+esc(m.definition)+"</p>";
+  if(F(r,"note"))h+='<p class="kv"><b>비고</b> '+esc(F(r,"note"))+"</p>";
+  if(m.comparability_note)h+='<p class="kv" style="color:var(--wn)"><b style="color:var(--wn)">주의</b> '+esc(m.comparability_note)+"</p>";
+  h+='<div class="act"><button class="b" data-copy="'+esc(id)+'">인용문 복사</button>';
+  if(s.doi)h+='<a class="b" href="https://doi.org/'+esc(s.doi)+'" target="_blank" rel="noopener">DOI</a>';
+  if(s.pmid)h+='<a class="b" href="https://pubmed.ncbi.nlm.nih.gov/'+esc(s.pmid)+'/" target="_blank" rel="noopener">PubMed</a>';
+  h+="</div>"+cmpHtml(key,r);
+  $("sheet").innerHTML=h;$("sheet").scrollTop=0;
+  if(!sheetOpen){document.body.classList.add("open","lock");sheetOpen=true;if(push!==false)history.pushState({sh:1},"")}
+}
+function closeSheet(){document.body.classList.remove("open","lock");sheetOpen=false}
+$("ov").addEventListener("click",function(){history.back()});
+$("sheet").addEventListener("click",function(e){
+  var t=e.target,b;
+  if(t.closest("[data-close]")){history.back();return}
+  b=t.closest("[data-copy]");if(b){copy(full(BYID[b.getAttribute("data-copy")]));return}
+  b=t.closest(".li[data-id]");if(b)openSheet(b.getAttribute("data-id"),b.getAttribute("data-ck"),false);
+});
+window.addEventListener("popstate",function(){if(sheetOpen)closeSheet()});
+function copy(tx){if(navigator.clipboard)navigator.clipboard.writeText(tx).then(function(){toast("복사했습니다")},function(){toast("복사하지 못했습니다")});else toast("복사하지 못했습니다")}
+var tmr;function toast(s){var e=$("toast");e.textContent=s;e.style.display="block";clearTimeout(tmr);tmr=setTimeout(function(){e.style.display="none"},1500)}
+
+/* ---------- views ---------- */
+function vHome(){
+  var h='<div class="tiles">';
+  [["pos","rNPV 성공확률","단계 전이율, LOA, 적응증과 모달리티별"],["dur","개발 기간","단계별 소요 기간, 허가 심사 기간"],["deal","L/O 딜 조건","선급금, 마일스톤, 로열티, 딜 규모"],["share","매출 추정","출시 순서별 점유율, 선도자 우위"]].forEach(function(t){h+='<button class="tile" data-go="'+t[0]+'"><b>'+esc(t[1])+"</b><span>"+esc(t[2])+"</span></button>"});
+  h+='</div><input class="srch" id="hq" type="search" placeholder="직접 검색: 로열티, Phase II 종양" enterkeyhint="search" autocomplete="off">';
+  h+='<button class="lnk" data-go="list">그 밖의 통계 전체 목록 (종결 사유, 허가 심사 등) &#8250;</button>';
+  h+='<p class="foot" style="margin-top:16px">수록 통계 '+R.length+"건, 문헌 "+Object.keys(S).length+"편. 수치는 각 문헌 원문 값을 옮긴 것이며 원문 PDF는 포함하지 않습니다. 인용 전에 원문으로 확인하십시오. 데이터 기준일 "+esc(DB.built)+".</p>";
+  return h;
+}
+function posOpts(src,dim){
+  var seen={},out=[];
+  [src+"_TRANS",src+"_LOA"].forEach(function(mid){sel(mid).forEach(function(r){
+    var ind=F(r,"indication"),mo=tr(F(r,"modality")),sg=tr(F(r,"segment")),v=null;
+    if(dim==="ind"&&E(mo)&&E(sg))v=ind;
+    else if(dim==="mod"&&!E(mo)&&ind==="전체")v=mo;
+    else if(dim==="seg"&&!E(sg)&&E(mo)&&ind==="전체")v=sg;
+    if(v&&!seen[v]){seen[v]=1;out.push(v)}
+  })});
+  out.sort(function(a,b){var o={"전체":0,"Oncology":1};var x=o.hasOwnProperty(a)?o[a]:2,y=o.hasOwnProperty(b)?o[b]:2;return x-y||a.localeCompare(b)});
+  return out;
+}
+function pm(r,dim,opt){
+  var ind=F(r,"indication"),mo=tr(F(r,"modality")),sg=tr(F(r,"segment"));
+  if(dim==="ind")return ind===opt&&E(mo)&&E(sg);
+  if(dim==="mod")return mo===opt&&ind==="전체";
+  return sg===opt&&E(mo)&&ind==="전체";
+}
+var KO={"Oncology":"종양","Non-oncology":"비종양","Non-Oncology":"비종양","Hematology":"혈액","Neurology":"신경","Psychiatry":"정신","Infectious disease":"감염","Autoimmune":"자가면역","Cardiovascular":"심혈관","Metabolic":"대사","Endocrine":"내분비","Respiratory":"호흡기","Ophthalmology":"안과","Urology":"비뇨","Allergy":"알레르기","Gastroenterology (non-IBD)":"소화기","Gastroenterology":"소화기","Others":"기타","Other":"기타","Solid":"고형암","Solid tumors":"고형암","Hematologic":"혈액암","Hematologic cancers":"혈액암","IO (면역항암)":"면역항암","Rare diseases":"희귀질환","Rare Diseases":"희귀질환","Chronic high prevalence":"만성 고유병","Chronic High Prevalence":"만성 고유병","Preselection biomarkers":"바이오마커 선별","Selection Biomarkers":"바이오마커 선별","No biomarkers":"바이오마커 없음","No Biomarkers":"바이오마커 없음","Small molecule":"저분자","Monoclonal antibody":"단일클론항체","Gene therapy":"유전자치료","Protein":"단백질","Peptide":"펩타이드","Vaccine":"백신","Antisense":"안티센스","Novel":"신규","Off-patent":"특허 만료","Biologic":"바이오의약품","Biosimilar":"바이오시밀러","Anti-infectives":"감염","Alimentary and metabolism":"소화, 대사","Musculoskeletal":"근골격","Nervous system":"신경계"};
+function ko(v){return KO[v]&&!/[가-힣]/.test(v)?KO[v]+" "+v:v}
+function vPos(){
+  var src=ST.posSrc,dim=ST.posDim,opts=posOpts(src,dim);
+  if(opts.indexOf(ST.posOpt)<0)ST.posOpt=opts[0];
+  var opt=ST.posOpt;
+  var h='<p class="clab">문헌</p>'+chips("posSrc",[["BIO2021","BIO 2021 (2011-2020)"],["BIO2016","BIO 2016 (2006-2015)"]],src);
+  h+='<p class="clab">구분 기준</p>'+chips("posDim",[["ind","적응증"],["mod","모달리티"],["seg","특성"]],dim);
+  h+=chips("posOpt",opts.map(function(o){return[o,ko(o)]}),opt);
+  var rows=[],durTot=null;
+  [["Phase I","I"],["Phase II","II"],["Phase III","III"],["NDA/BLA","N"]].forEach(function(x){
+    var s=PST[x[1]];
+    var t=one(src+"_TRANS",function(r){return F(r,"stage")===s[0]&&pm(r,dim,opt)});
+    var l=s[1]?one(src+"_LOA",function(r){return F(r,"stage")===s[1]&&pm(r,dim,opt)}):null;
+    var d=null;
+    if(dim==="ind"){
+      if(src==="BIO2021")d=one("BIO2021_DURATION",function(r){return F(r,"stage")===s[0]&&ni(F(r,"indication"))===ni(opt)});
+      else if(x[1]==="N")d=one("BIO2016_REVIEW_TIME",function(r){return ni(F(r,"indication"))===ni(opt)});
+    }
+    rows.push([x[0]+(x[1]==="N"?"":" 진입"),cell(t,"trans:"+x[1],{n:1}),s[1]?cell(l,"loa:"+x[1],{n:1}):'<td class="v na">-</td>',cell(d,"dur:"+x[1])]);
+  });
+  if(src==="BIO2021"&&dim==="ind")durTot=one("BIO2021_DURATION",function(r){return F(r,"stage")==="Phase I->Approval"&&ni(F(r,"indication"))===ni(opt)});
+  var cap=(src==="BIO2021"?"BIO, Informa, QLS 2021":"BIO, Biomedtracker, Amplion 2016")+". 전이율은 다음 단계 진입 확률, LOA는 해당 단계 시작부터 승인까지 확률입니다.";
+  h+=sec(ko(opt),cap,tbl(["단계","전이율","LOA","기간(년)"],rows),(durTot?"Phase I부터 승인까지 총 "+sv(durTot)+"년. ":"")+(src==="BIO2016"?"BIO 2016은 단계별 기간을 제공하지 않으며 NDA/BLA 기간은 허가 심사 기간입니다. ":dim!=="ind"?"기간은 적응증 기준으로만 제공됩니다. ":"")+"칸을 누르면 출처와 다른 문헌 값을 볼 수 있습니다.");
+  var pr=[];
+  [["Preclinical",""],["Phase I","I"],["Phase II","II"],["Phase III","III"],["Submission-to-launch","N"]].forEach(function(x){
+    var p=one("PAUL_PTS",stg(x[0])),lo=(BYM.PAUL_PTS||[]).filter(function(r){return F(r,"stage")===x[0]&&F(r,"stat_type")==="sens_low"})[0],hi=(BYM.PAUL_PTS||[]).filter(function(r){return F(r,"stage")===x[0]&&F(r,"stat_type")==="sens_high"})[0];
+    pr.push([x[0]==="Submission-to-launch"?"허가 제출":x[0],cell(p,x[1]?"trans:"+x[1]:""),'<td class="v na">'+(lo&&hi?esc(sv(lo))+" ~ "+esc(sv(hi)):"-")+"</td>",cell(one("PAUL_CYCLE",stg(x[0])),x[1]?"dur:"+x[1]:"")]);
+  });
+  h+=sec("Paul 2010 모델 가정치","PBF 13개 대형 제약사 벤치마크와 Lilly 자료를 바탕으로 한 R&D 경제성 모델의 가정값입니다. 관측 통계가 아니므로 BIO 값과 구분해 쓰십시오.",tbl(["단계","p(TS)","민감도 범위","기간(년)"],pr));
+  var ar=sel("DOWDEN_AREA",stg("Phase I->Launch")).map(function(r){var a=F(r,"indication");return[ko(a==="Anticancer"?"Oncology":a),cell(r,"loa:I"),cell(one("DOWDEN_AREA",function(x){return F(x,"indication")===a&&F(x,"stage")==="Phase II->Launch"}),"loa:II"),cell(one("DOWDEN_AREA",function(x){return F(x,"indication")===a&&F(x,"stage")==="Phase III->Launch"}),"loa:III")]});
+  h+=sec("Dowden 2019 치료영역별 출시 확률","CMR International PDM 기준, 2010-2017. 정의와 치료영역 분류가 BIO와 다릅니다.",tbl(["치료영역","I→출시","II→출시","III→출시"],ar));
+  var per=[];sel("DOWDEN_PROGRESSION",stg("Phase I->Launch")).forEach(function(r){per.push(F(r,"period"))});
+  h+=sec("Dowden 2019 기간별 단계 성공률","3년 이동 구간별 전체 적응증 값입니다.",tbl(["기간","I→출시","II→III","II→출시","III→출시"],per.map(function(p){function g(s){return one("DOWDEN_PROGRESSION",function(r){return F(r,"stage")===s&&F(r,"period")===p})}return[p,cell(g("Phase I->Launch"),"loa:I"),cell(g("Phase II->Phase III"),"trans:II"),cell(g("Phase II->Launch"),"loa:II"),cell(g("Phase III->Launch"),"loa:III")]})));
+  var az=[];
+  [["Preclinical",""],["Phase I","I"],["Phase II","II"],["Phase III","III"]].forEach(function(x){
+    function mg(seg,per){return one("MORGAN_STAGE_SUCCESS",function(r){return F(r,"stage")===x[0]&&F(r,"segment")===seg&&F(r,"period")===per})}
+    var c=x[1]?"trans:"+x[1]:"";
+    az.push([x[0],cell(mg("AstraZeneca","2005-2010"),c),cell(mg("AstraZeneca","2012-2016"),c),cell(mg("업계(CMR)","2013-2015"),c),cell(one("COOK_STAGE_SUCCESS",function(r){return F(r,"stage")===x[0]&&F(r,"segment")==="업계 중앙값(PBF)"}),c)]);
+  });
+  h+=sec("AstraZeneca 대 업계 (Morgan 2018, Cook 2014)","단계별 프로젝트 성공률입니다. 업계 값은 CMR(2013-2015)과 PBF 중앙값(2005-2010)입니다.",tbl(["단계","AZ 05-10","AZ 12-16","CMR 13-15","PBF 05-10"],az),STAR);
+  return h;
+}
+function vDur(){
+  var inds=[];sel("BIO2021_DURATION",stg("Phase I->Approval")).forEach(function(r){inds.push(F(r,"indication"))});
+  inds.sort(function(a,b){var o={"전체":0,"Oncology":1};var x=o.hasOwnProperty(a)?o[a]:2,y=o.hasOwnProperty(b)?o[b]:2;return x-y||a.localeCompare(b)});
+  var keys=[["Phase I->Phase II","I"],["Phase II->Phase III","II"],["Phase III->NDA/BLA","III"],["NDA/BLA->Approval","N"],["Phase I->Approval","T"]];
+  var rows=inds.map(function(i){return[ko(i)].concat(keys.map(function(k){return cell(one("BIO2021_DURATION",function(r){return F(r,"indication")===i&&F(r,"stage")===k[0]}),"dur:"+k[1])}))});
+  var h=sec("적응증별 단계 소요 기간 (BIO 2021)","2011-2020, 단위 년. 각 단계 시작부터 다음 단계 진입까지 기간입니다.",tbl(["적응증","I","II","III","허가","I→승인"],rows));
+  var pr=["Target-to-hit","Hit-to-lead","Lead optimization","Preclinical","Phase I","Phase II","Phase III","Submission-to-launch"].map(function(s){var k={"Phase I":"I","Phase II":"II","Phase III":"III","Submission-to-launch":"N"}[s];return[s==="Submission-to-launch"?"허가 제출":s,cell(one("PAUL_CYCLE",stg(s)),k?"dur:"+k:"")]});
+  h+=sec("Paul 2010 단계별 사이클타임","모델 가정치, 단위 년.",tbl(["단계","기간"],pr));
+  var rv=sel("BIO2016_REVIEW_TIME").map(function(r){return[ko(F(r,"indication")),cell(r,"dur:N"),cell(one("BIO2016_REVIEW",function(x){return F(x,"indication")===F(r,"indication")&&F(x,"segment")==="1차 심사 승인"}),"trans:N"),cell(one("BIO2016_REVIEW",function(x){return F(x,"indication")===F(r,"indication")&&F(x,"segment")==="최종 승인"}),"trans:N")]});
+  rv.sort(function(a,b){return a[0]==="전체"?-1:b[0]==="전체"?1:0});
+  h+=sec("허가 심사 (BIO 2016)","2006-2015 최초 NDA/BLA 제출 건 기준입니다.",tbl(["적응증","기간(년)","1차 승인","최종 승인"],rv),STAR);
+  return h;
+}
+var DSTG=["Research","Preclinical","Phase I","Phase II","Phase III","승인 또는 시판","Multiple stages","전체"];
+var DSRC={
+  NEUENDORF2023:{lab:"Neuendorf 2023 (평균)",cap:"Biotechgate DB, 2010년 이후 라이선싱 딜 2,942건의 체결 단계별 평균입니다. 단위 USD m.",cols:[["선급금","up",function(s){return one("NEU_AVG_PAYMENT",function(r){return dn(F(r,"stage"))===s&&F(r,"segment")==="Upfront"})}],["총 딜","tot",function(s){return one("NEU_AVG_PAYMENT",function(r){return dn(F(r,"stage"))===s&&F(r,"segment")==="Total deal"})}],["선급금 비중","ush",function(s){return one("NEU_COMPOSITION",function(r){return dn(F(r,"stage"))===s&&F(r,"segment")==="Upfront"})}]]},
+  BTG2020:{lab:"Biotechgate 2020 (평균)",cap:"Biotechgate 라이선스 딜 2010-2020 풀링 평균입니다. 단위 USD m. 단계별 딜 수는 제시되지 않았습니다.",cols:[["선급금","up",function(s){return one("BTG_AVG_UPFRONT",function(r){return dn(F(r,"stage"))===s})}],["딜 가치","tot",function(s){return one("BTG_AVG_DEALVALUE",function(r){return dn(F(r,"stage"))===s})}],["선급금 비중","ush",function(s){return one("BTG_UPFRONT_SHARE",function(r){return dn(F(r,"stage"))===s})}]]},
+  TRIGEORGIS2023:{lab:"Trigeorgis 2023 (중위값)",n:1,cap:"2003-2013 미국 라이선싱 딜 257건의 중위값입니다. 단위 USD m, 로열티는 %.",cols:[["선급금","up",function(s){return one("TRI_MEDIAN_UPFRONT",function(r){return dn(F(r,"stage"))===s})}],["R&D MS","rdms",function(s){return one("TRI_MEDIAN_RD_MS",function(r){return dn(F(r,"stage"))===s})}],["판매 MS","slms",function(s){return one("TRI_MEDIAN_SALES_MS",function(r){return dn(F(r,"stage"))===s})}],["로열티","roy",function(s){return one("TRI_MEDIAN_ROYALTY",function(r){return dn(F(r,"stage"))===s})}]]},
+  PULLAN2019:{lab:"Pullan 2019 (평균)",cap:"GlobalData 2016-2019 금액 공개 제품 라이선스 딜 평균입니다. 단위 USD m. 표본 수 미제시.",cols:[["선급금","up",function(s){return one("PULLAN_UPFRONT",function(r){return dn(F(r,"stage"))===s})}]]}
+};
+function vDeal(){
+  var k=ST.dealSrc;if(!DSRC[k])k=ST.dealSrc="NEUENDORF2023";
+  var d=DSRC[k];
+  var h='<p class="clab">문헌</p>'+chips("dealSrc",Object.keys(DSRC).map(function(x){return[x,DSRC[x].lab]}),k);
+  var rows=[];
+  DSTG.forEach(function(s){var cs=d.cols.map(function(c){return c[2](s)});if(cs.some(Boolean))rows.push([s].concat(cs.map(function(r,i){return cell(r,d.cols[i][1]+":"+s,{n:d.n})})))});
+  h+=sec("체결 단계별 딜 조건",d.cap,tbl(["체결 단계"].concat(d.cols.map(function(c){return c[0]})),rows),"선급금, 총 딜, 선급금 비중, 로열티 칸을 누르면 다른 문헌의 같은 단계 값이 나란히 나옵니다.");
+  if(k==="NEUENDORF2023"){
+    var comp=["Upfront","Phase 1 milestone","Phase 2 milestone","Phase 3 milestone","Approval milestone","Registration milestone","Sales milestone","Total deal"];
+    var KN={"Upfront":"선급금","Phase 1 milestone":"1상 MS","Phase 2 milestone":"2상 MS","Phase 3 milestone":"3상 MS","Approval milestone":"승인 MS","Registration milestone":"등재 MS","Sales milestone":"판매 MS","Total deal":"총 딜"};
+    h+=sec("체결 단계별 지급 구성 (Neuendorf Fig 1c)","평균 금액, USD m. 마일스톤은 달성 가정의 명목 금액입니다.",tbl(["구성요소","Phase I","Phase II","Phase III"],comp.map(function(c){return[KN[c]].concat(["Phase I","Phase II","Phase III"].map(function(s){return cell(one("NEU_AVG_PAYMENT",function(r){return F(r,"stage")===s&&F(r,"segment")===c}),c==="Upfront"?"up:"+s:c==="Total deal"?"tot:"+s:"")}))})));
+    h+=sec("구성요소별 비중 (Neuendorf Fig 1b)","총 딜 대비 비중입니다.",tbl(["구성요소","Phase I","Phase II","Phase III"],comp.slice(0,7).map(function(c){return[KN[c]].concat(["Phase I","Phase II","Phase III"].map(function(s){return cell(one("NEU_COMPOSITION",function(r){return F(r,"stage")===s&&F(r,"segment")===c}),c==="Upfront"?"ush:"+s:"")}))})));
+    h+=sec("계약 항목 포함 비율 (Neuendorf Fig 1a)","",tbl(["항목","비율"],sel("NEU_CONTRACT_SHARE").map(function(r){return[F(r,"segment"),cell(r)]})));
+    h+=sec("마일스톤 단계별 평균 지급액 (Neuendorf Fig 2a)","USD m.",tbl(["마일스톤","평균","딜 수"],sel("NEU_MILESTONE_AVG").map(function(r){return[F(r,"segment"),cell(r),'<td class="v na">'+esc(nf(F(r,"n")))+"</td>"]})));
+  }else if(k==="BTG2020"){
+    var ind=sel("BTG_AVG_UPFRONT",function(r){return F(r,"indication")!=="전체"}).map(function(r){var i=F(r,"indication");return[i,cell(r),cell(one("BTG_AVG_DEALVALUE",function(x){return F(x,"indication")===i}))]});
+    h+=sec("적응증별 평균 (Biotechgate Slide 13)","USD m, 2010-2020 풀링.",tbl(["적응증","선급금","딜 가치"],ind));
+    var yrs=sel("BTG_ROYALTY").map(function(r){return F(r,"period")});
+    h+=sec("연도별 추이 (Biotechgate Slide 8-12)","평균 선급금과 딜 가치는 USD m, 선급금 합계는 USD bn. 2020은 연중 일부입니다.",tbl(["연도","평균 선급금","평균 딜 가치","선급금 비중","로열티","딜 건수","선급금 합계"],yrs.map(function(y){function g(m,f){return one(m,function(r){return F(r,"period")===y&&(!f||f(r))})}return[y,cell(g("BTG_AVG_UPFRONT",function(r){return F(r,"stage")===""&&F(r,"indication")==="전체"})),cell(g("BTG_AVG_DEALVALUE",function(r){return F(r,"stage")===""&&F(r,"indication")==="전체"})),cell(g("BTG_UPFRONT_SHARE",function(r){return F(r,"stage")===""})),cell(g("BTG_ROYALTY"),"roy:전체"),cell(g("BTG_DEAL_COUNT")),cell(g("BTG_UPFRONT_TOTAL"))]})),"딜 건수는 그래프 판독 추정치입니다.");
+  }else if(k==="TRIGEORGIS2023"){
+    h+=sec("개발 통제 주체별 계약 유형 (Trigeorgis Table 2)","",tbl(["유형","비중"],sel("TRI_SCHEME").map(function(r){return[F(r,"segment").replace(/ \(D\)$/,""),cell(r)]})));
+  }else if(k==="PULLAN2019"){
+    h+=sec("치료영역당 딜 소싱 깔때기 (Pullan p.6)","대형 제약사의 대략적 건수(typical breakdown)입니다.",tbl(["단계","건수"],sel("PULLAN_FUNNEL").map(function(r){return[F(r,"segment"),cell(r)]})));
+  }
+  return h+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function vShare(){
+  var ords=[["1","1번째"],["2","2번째"],["3","3번째"],["4","4번째"],["5","5번째"],["6","6번째 이후"]];
+  var rows=ords.map(function(o){return[o[1],cell(one("MCK_SHARE10",function(r){return ord(r)===o[0]}),"shr:"+o[0],{n:1}),cell(one("MCK_ADV",function(r){return ord(r)===o[0]}),"adv:"+o[0]),cell(one("MCK_REL_SHARE",function(r){return ord(r)===o[0]})),cell(one("RIDLEY_PEAK",function(r){return ord(r)===o[0]}),"shr:"+o[0],{n:1})]});
+  var h=sec("출시 순서별 점유율","McKinsey 2014는 첫 출시 후 10년차 매출 점유율(1986-2012 출시), Ridley 2015는 미국 처방 기준 피크 점유율 평균(1988-2009 승인)입니다. 정의가 달라 직접 비교하지 마십시오.",tbl(["출시 순서","10년차","우위(%p)","1번째 대비","피크 평균"],rows),"우위는 공정 점유율(1/n) 대비 차이입니다. 1번째 대비는 10년차 점유율로 계산한 파생값입니다.");
+  var dl=["3개월 지연","6개월 지연","1년 지연","2년 지연","4개월 조기 출시"].map(function(d){function g(n){return one("RIDLEY_DELAY",function(r){return F(r,"segment")===n+"번째 진입자 | "+d})}return[d,cell(g(2)),cell(g(3))]});
+  h+=sec("출시 지연의 피크 점유율 영향 (Ridley Fig S1)","단위 %p.",tbl(["시점 변화","2번째","3번째"],dl));
+  var rs=[["all","전체"],["2","2번째"],["3","3번째"],["4","4번째"]].map(function(o){function g(m){return one(m,function(r){return ord(r)===o[0]})}return[o[1],cell(g("RIDLEY_PEAK")),cell(g("RIDLEY_PROMO")),cell(g("RIDLEY_GAP"))]});
+  h+=sec("Ridley 2015 요약통계 (Table S2)","평균값입니다. 시간차 단위는 분기.",tbl(["진입 순서","피크","판촉 점유율","직전 대비 시간차"],rs));
+  var cd=sel("MCK_ADV_COND").map(function(r){var s=F(r,"segment").split(" = ");return[s[0]+": "+(s[1]||"").replace(/\s*\(.*\)$/,""),cell(r)]});
+  h+=sec("조건별 선도자 우위 (McKinsey Exhibit 3)","단위 %p.",tbl(["조건","우위"],cd));
+  h+=sec("시대별 선도자 우위 (McKinsey 본문)","",tbl(["구분","우위"],sel("MCK_ADV_ERA").map(function(r){return[F(r,"period")||F(r,"segment"),cell(r)]})),STAR);
+  return h;
+}
+function vList(){
+  var fam={};R.forEach(function(r){var f=(M[F(r,"metric_id")]||{}).family;if(!fam[f])fam[f]={n:0,s:{}};fam[f].n++;fam[f].s[sname(r)]=1});
+  var ks=Object.keys(fam).sort(function(a,b){return a.localeCompare(b)});
+  var h='<div class="lst">';
+  ks.forEach(function(f){h+='<div class="li" data-fam="'+esc(f)+'"><div>'+esc(f)+"<small>"+esc(Object.keys(fam[f].s).join(", "))+'</small></div><div class="r" style="font-weight:400;color:var(--tx2)">'+fam[f].n+"건 &#8250;</div></div>"});
+  return h+"</div>";
+}
+/* ---------- search view ---------- */
+var openState={},tableState={},shown={},SQ={q:"",f:"",sc:"",og:false};
+function vSearch(){
+  var h='<input class="srch" id="q" type="search" placeholder="Phase II 종양, royalty, 선급금" enterkeyhint="search" autocomplete="off" value="'+esc(SQ.q)+'">';
+  h+='<div class="bar"><select id="fam" aria-label="지표 분류"><option value="">분류 전체</option></select><select id="src" aria-label="출처 문헌"><option value="">문헌 전체</option></select><label class="tg"><input type="checkbox" id="orig"'+(SQ.og?" checked":"")+"> 원문값만</label></div><div id=\"out\"></div>";
+  return h;
+}
+function initSearch(){
+  var fams=[],famN={};
+  R.forEach(function(r){var f=(M[F(r,"metric_id")]||{}).family;if(!famN[f]){famN[f]=0;fams.push(f)}famN[f]++});
+  fams.sort();
+  fams.forEach(function(f){var o=document.createElement("option");o.value=f;o.textContent=f+" ("+famN[f]+")";$("fam").appendChild(o)});
+  Object.keys(S).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=SHORT[k]||k;$("src").appendChild(o)});
+  $("fam").value=SQ.f;$("src").value=SQ.sc;
+  var dt;$("q").addEventListener("input",function(){clearTimeout(dt);dt=setTimeout(function(){SQ.q=$("q").value;shown={};render()},120)});
+  $("fam").addEventListener("change",function(){SQ.f=this.value;shown={};render()});
+  $("src").addEventListener("change",function(){SQ.sc=this.value;shown={};render()});
+  $("orig").addEventListener("change",function(){SQ.og=this.checked;shown={};render()});
+  render();
+  if(!SQ.q&&!SQ.f)$("q").focus();
+}
 function search(){
-  var q=$("q").value.trim(),f=$("fam").value,sc=$("src").value,og=$("orig").checked;
+  var q=SQ.q.trim(),f=SQ.f,sc=SQ.sc,og=SQ.og;
   var toks=q?tokenize(q):[];
-  var groups=toks.map(alts);
-  var res=[];
+  var groups=toks.map(alts),res=[];
   for(var i=0;i<R.length;i++){
     var r=R[i];
     if(f&&(M[r[C.metric_id]]||{}).family!==f)continue;
@@ -228,76 +536,79 @@ function search(){
     }
     if(ok)res.push(r);
   }
-  return {res:res,q:q,f:f,sc:sc};
+  return{res:res,q:q,f:f,sc:sc};
 }
 function render(){
   var o=search(),out=$("out"),res=o.res;
-  if(!o.q&&!o.f&&!o.sc){home();return}
+  if(!out)return;
+  if(!o.q&&!o.f&&!o.sc){out.innerHTML='<div class="empty">검색어를 입력하거나 분류를 고르십시오.<br>한국어와 영어 모두 검색됩니다.</div>';return}
   if(!res.length){out.innerHTML='<div class="empty">일치하는 통계가 없습니다.<br>키워드를 줄이거나 분류, 문헌 필터를 해제해 보십시오.</div>';return}
   var by={},order=[];
   res.forEach(function(r){var k=r[C.metric_id];if(!by[k]){by[k]=[];order.push(k)}by[k].push(r)});
   var famMet={};
   order.forEach(function(k){var m=M[k]||{};if((m.name_ko||"").indexOf("(파생)")<0){(famMet[m.family]=famMet[m.family]||[]).push(k)}});
   var multi=Object.keys(famMet).filter(function(f){return famMet[f].length>1});
-  var h='<div class="sum">'+res.length+'건, 지표 '+order.length+'종</div>';
-  if(multi.length)h+='<div class="warn">같은 분류 안에 정의가 다른 지표가 섞여 있습니다('+esc(multi.join(", "))+'). 값끼리 직접 비교하지 말고 각 지표의 정의를 확인하십시오.</div>';
+  var h='<div class="sum">'+res.length+"건, 지표 "+order.length+"종</div>";
+  if(multi.length)h+='<div class="warn">같은 분류 안에 정의가 다른 지표가 섞여 있습니다('+esc(multi.join(", "))+"). 각 지표의 정의를 확인하십시오.</div>";
   order.forEach(function(k){
-    var m=M[k]||{},rows=by[k],lim=shown[k]||5,tb=tableState[k];
-    h+='<section class="grp"><div class="gh"><b>'+esc(m.name_ko||k)+'</b><div class="df">'+esc(m.definition||"")+'</div>';
-    if(m.comparability_note)h+='<div class="cn">주의: '+esc(m.comparability_note)+'</div>';
-    h+='</div>';
-    if(tb){
-      h+='<div class="tw"><table><tr><th>구분</th><th>값</th><th>n</th><th>기간</th><th>출처</th></tr>';
-      rows.forEach(function(r){h+='<tr><td>'+esc(label(r))+'</td><td class="n">'+esc(fmt(r))+'</td><td class="n">'+esc(r[C.n])+'</td><td>'+esc(r[C.period])+'</td><td>'+esc(cite(r))+(isOrig(r[C.nature])?'':' <span class="bd es">'+esc(r[C.nature].replace(/\(.*$/,""))+'</span>')+'</td></tr>'});
-      h+='</table></div>';
-    }else{
-      rows.slice(0,lim).forEach(function(r){h+=card(r)});
-      if(rows.length>lim)h+='<button class="b more" data-more="'+esc(k)+'">'+(rows.length-lim)+'건 더 보기</button>';
-    }
-    if(rows.length>1)h+='<div class="act"><button class="b" data-tb="'+esc(k)+'">'+(tb?'카드로 보기':'표로 비교 ('+rows.length+'행)')+'</button></div>';
-    h+='</section>';
+    var m=M[k]||{},rows=by[k],lim=shown[k]||8;
+    h+='<section class="grp"><div class="gh"><b>'+esc(m.name_ko||k)+'</b><div class="df">'+esc(m.definition||"")+"</div>";
+    if(m.comparability_note)h+='<div class="cn">주의: '+esc(m.comparability_note)+"</div>";
+    h+='</div><div class="lst" style="margin-top:6px">';
+    rows.slice(0,lim).forEach(function(r){
+      var es=!isOrig(F(r,"nature")),bits=[F(r,"n")?"n="+nf(F(r,"n")):"",F(r,"period"),sname(r)+(F(r,"location")?", "+F(r,"location"):"")].filter(Boolean).join(", ");
+      h+='<div class="li" data-id="'+esc(F(r,"stat_id"))+'" data-ck="'+esc(autoCk(r))+'"><div>'+esc(label(r))+"<small>"+esc(bits)+'</small></div><div class="r">'+esc(fmt(r))+'<small><span class="bd'+(es?" es":"")+'">'+esc(natS(F(r,"nature")))+"</span></small></div></div>";
+    });
+    h+="</div>";
+    if(rows.length>lim)h+='<button class="b" style="width:100%;margin-top:6px" data-more="'+esc(k)+'">'+(rows.length-lim)+"건 더 보기</button>";
+    h+="</section>";
   });
   out.innerHTML=h;
 }
-function card(r){
-  var id=r[C.stat_id],s=S[r[C.source_id]]||{},nat=r[C.nature],open=openState[id];
-  var h='<div class="card'+(open?' open':'')+'" data-id="'+esc(id)+'"><div class="top"><span class="val">'+esc(fmt(r))+'</span><span class="bd'+(isOrig(nat)?'':' es')+'">'+esc(nat)+'</span></div>';
-  h+='<div class="lbl">'+esc(label(r))+'</div>';
-  h+='<div class="sub">'+[r[C.n]?"n="+r[C.n]:"",r[C.period],cite(r)].filter(Boolean).map(esc).join(" · ")+'</div>';
-  h+='<div class="det">';
-  if(r[C.population])h+='<p>모집단: '+esc(r[C.population])+'</p>';
-  if(r[C.note])h+='<p>비고: '+esc(r[C.note])+'</p>';
-  h+='<p>'+esc(s.title)+', '+esc(s.journal_or_publisher)+'</p>';
-  var ln=[];
-  if(s.doi)ln.push('<a class="b" href="https://doi.org/'+esc(s.doi)+'" target="_blank" rel="noopener">DOI</a>');
-  if(s.pmid)ln.push('<a class="b" href="https://pubmed.ncbi.nlm.nih.gov/'+esc(s.pmid)+'/" target="_blank" rel="noopener">PubMed</a>');
-  h+='<div class="act"><button class="b" data-copy="'+esc(id)+'">인용문 복사</button>'+ln.join("")+'</div></div></div>';
-  return h;
+function autoCk(r){
+  var mid=F(r,"metric_id"),st=F(r,"stage");
+  for(var k in PST){var s=PST[k];
+    if(/_TRANS$/.test(mid)&&st===s[0])return"trans:"+k;
+    if(/_LOA$/.test(mid)&&st===s[1])return"loa:"+k;
+    if(mid==="BIO2021_DURATION"&&st===s[0])return"dur:"+k;
+    if((mid==="PAUL_PTS"||mid==="MORGAN_STAGE_SUCCESS"||mid==="COOK_STAGE_SUCCESS")&&st===s[2])return"trans:"+k;
+    if(mid==="PAUL_CYCLE"&&st===s[2])return"dur:"+k;
+    if((mid==="DOWDEN_PROGRESSION"||mid==="DOWDEN_AREA"||mid==="PAUL_CUM")&&st===s[3])return"loa:"+k;
+  }
+  if(mid==="BIO2021_DURATION"&&st==="Phase I->Approval")return"dur:T";
+  var dm={NEU_AVG_PAYMENT:{Upfront:"up","Total deal":"tot"},NEU_COMPOSITION:{Upfront:"ush"}}[mid];
+  if(dm&&dm[F(r,"segment")])return dm[F(r,"segment")]+":"+dn(st);
+  var dd={BTG_AVG_UPFRONT:"up",TRI_MEDIAN_UPFRONT:"up",PULLAN_UPFRONT:"up",BTG_AVG_DEALVALUE:"tot",BTG_UPFRONT_SHARE:"ush",TRI_MEDIAN_ROYALTY:"roy"}[mid];
+  if(dd&&st)return dd+":"+dn(st);
+  if(mid==="BTG_ROYALTY")return"roy:전체";
+  if(mid==="MCK_SHARE10"||mid==="RIDLEY_PEAK")return ord(r)&&ord(r)!=="all"?"shr:"+ord(r):"";
+  if(mid==="MCK_ADV")return"adv:"+ord(r);
+  return"";
 }
-var EX=[["Phase II 성공확률 종양","적응증별 단계 전이율"],["로열티","딜 구조 로열티율"],["Phase III 선급금","체결 단계별 선급금"],["출시순서 점유율","시장점유율"],["소요기간 Phase II","단계별 소요 기간"]];
-function home(){
-  var h='<div class="sum">검색어를 입력하거나 예시를 눌러 보십시오. 수록 통계 '+R.length+'건</div>';
-  EX.forEach(function(e){h+='<button class="ex" data-ex="'+esc(e[0])+'">'+esc(e[0])+'<small>'+esc(e[1])+'</small></button>'});
-  $("out").innerHTML=h;
+/* ---------- router ---------- */
+var TT={"":"벤치마크 조회",pos:"rNPV 성공확률",dur:"개발 기간",deal:"L/O 딜 조건",share:"매출 추정",list:"통계 전체 목록",search:"검색"};
+function route(){
+  if(sheetOpen)closeSheet();
+  var h=location.hash.replace(/^#\/?/,""),v=h.split("?")[0];
+  if(!TT.hasOwnProperty(v))v="";
+  $("ttl").textContent=TT[v];$("back").style.display=v?"block":"none";
+  var html={"":vHome,pos:vPos,dur:vDur,deal:vDeal,share:vShare,list:vList,search:vSearch}[v]();
+  $("view").innerHTML=html;window.scrollTo(0,0);
+  if(v==="search")initSearch();
+  if(v===""){var hq=$("hq");hq.addEventListener("keydown",function(e){if(e.key==="Enter"){SQ={q:hq.value,f:"",sc:"",og:false};location.hash="search"}})}
 }
-var byId={};R.forEach(function(r){byId[r[C.stat_id]]=r});
-$("out").addEventListener("click",function(e){
-  var t=e.target,b=t.closest("[data-ex]");
-  if(b){$("q").value=b.getAttribute("data-ex");render();return}
-  b=t.closest("[data-tb]");if(b){var k=b.getAttribute("data-tb");tableState[k]=!tableState[k];render();return}
-  b=t.closest("[data-more]");if(b){var k2=b.getAttribute("data-more");shown[k2]=(shown[k2]||5)+20;render();return}
-  b=t.closest("[data-copy]");
-  if(b){var tx=full(byId[b.getAttribute("data-copy")]);
-    var done=function(){toast("복사했습니다")};
-    if(navigator.clipboard)navigator.clipboard.writeText(tx).then(done,function(){toast("복사하지 못했습니다")});else toast("복사하지 못했습니다");return}
-  if(t.closest("a"))return;
-  var c=t.closest(".card");if(c){var id=c.getAttribute("data-id");openState[id]=!openState[id];c.classList.toggle("open")}
+function rerender(){var y=window.scrollY;$("view").innerHTML={pos:vPos,dur:vDur,deal:vDeal,share:vShare}[location.hash.replace(/^#\/?/,"")]();window.scrollTo(0,y)}
+$("back").addEventListener("click",function(){if(history.length>1)history.back();else location.hash=""});
+$("view").addEventListener("click",function(e){
+  var t=e.target,b;
+  b=t.closest("[data-go]");if(b){location.hash=b.getAttribute("data-go");return}
+  b=t.closest(".chip");if(b){var g=b.parentNode.getAttribute("data-chip");ST[g]=b.getAttribute("data-v");if(g==="posSrc"||g==="posDim")ST.posOpt="";save();rerender();return}
+  b=t.closest("[data-fam]");if(b){SQ={q:"",f:b.getAttribute("data-fam"),sc:"",og:false};location.hash="search";return}
+  b=t.closest("[data-more]");if(b){var k=b.getAttribute("data-more");shown[k]=(shown[k]||8)+30;render();return}
+  b=t.closest("[data-id]");if(b){openSheet(b.getAttribute("data-id"),b.getAttribute("data-ck"));return}
 });
-var tmr;function toast(s){var e=$("toast");e.textContent=s;e.style.display="block";clearTimeout(tmr);tmr=setTimeout(function(){e.style.display="none"},1500)}
-var dt;$("q").addEventListener("input",function(){clearTimeout(dt);dt=setTimeout(function(){shown={};render()},120)});
-["fam","src","orig"].forEach(function(i){$(i).addEventListener("change",function(){shown={};render()})});
-$("foot").innerHTML='수치는 각 문헌의 원문 값을 옮긴 것이며, 값의 성격(원문값, 추정, 파생)을 카드마다 표시합니다. 보고서에 인용하기 전에 원문으로 확인하십시오. 원문 PDF는 포함하지 않으며 DOI 링크로 연결합니다. 데이터 기준일 '+esc(DB.built)+'.';
-render();
+window.addEventListener("hashchange",route);
+route();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
 })();
 </script>
