@@ -81,18 +81,93 @@ var R=DB.rows,S=DB.sources,M=DB.metrics;
 var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 var ROM={"1":"i","2":"ii","3":"iii","4":"iv"};
-var AL={"p1":"phase i","1상":"phase i","임상1상":"phase i","p2":"phase ii","2상":"phase ii","임상2상":"phase ii","p3":"phase iii","3상":"phase iii","임상3상":"phase iii","전임상":"preclinical","출시":"launch","허가":"approval",
-"성공확률":["단계 성공확률","누적 성공확률","loa"],"성공률":["단계 성공확률","누적 성공확률","loa"],"승인확률":["loa"],"전이율":["전이"],
-"종양":"oncology","항암":["oncology","anticancer"],"비종양":"non-oncology","희귀":"rare","백신":"vaccine","바이오마커":"biomarker","혈액":"hematolog","중추신경":["cns","nervous","neurology"],"감염":"infect","자가면역":"autoimmune",
-"선급금":["선급금","upfront"],"로열티":["로열티","royalt"],"마일스톤":["마일스톤","milestone"],"점유율":"점유율","출시순서":"출시 순서","소요기간":["소요 기간","duration"],"기간":["소요 기간","duration"],"저분자":["저분자","small molecule"],"항체":["monoclonal antibody","antibody"]};
+var G=[
+["성공확률","성공률","success rate","probability of success","success probability","loa","likelihood of approval","승인확률","승인 확률"],
+["전이","전이율","transition","transition rate"],
+["누적","cumulative"],
+["확률","probability","likelihood"],
+["소요 기간","기간","소요기간","duration","cycle time","cycle-time","사이클타임","time"],
+["소모율","attrition"],
+["종결","중단","종결 사유","termination","discontinu","terminat","reason","사유"],
+["승인","approval","approved"],
+["허가","regulatory","허가 심사","regulatory review","review"],
+["출시","launch"],
+["전임상","preclinical","pre-clinical"],
+["임상","clinical"],
+["종양","oncology","cancer","tumor","tumour","항암","anticancer","solid tumors"],
+["비종양","non-oncology"],
+["혈액","hematolog","blood"],
+["희귀","rare","orphan","희귀의약품"],
+["바이오마커","biomarker"],
+["저분자","small molecule","small-molecule"],
+["경구","oral"],
+["바이오","biologic","biological"],
+["백신","vaccine"],
+["항체","antibody","monoclonal antibody","mab"],
+["유전자치료","gene therapy"],
+["세포치료","cell therapy","car-t"],
+["선급금","upfront","upfront payment","up-front"],
+["마일스톤","milestone"],
+["로열티","로열티율","royalty","royalties","royalty rate"],
+["딜 가치","딜 총액","deal value","deal size","total deal","total potential value"],
+["딜 건수","number of deals","deal count","deals"],
+["딜","deal"],
+["라이선스","라이선싱","license","licensing","licence"],
+["계약","contract","agreement"],
+["구조","structure"],
+["구성비","composition","breakdown","구성요소"],
+["점유율","share","market share"],
+["피크 점유율","peak share","peak market share"],
+["출시 순서","출시순서","진입자","order of entry","entry order","launch order","entrant"],
+["선도자","first mover","first-mover","pioneer","선도자 우위","pioneer advantage"],
+["지연","delay","lag"],
+["시간차","time gap","interval","lead time"],
+["평균","average","mean"],
+["중위","median"],
+["합계","total","sum"],
+["풀링","pooled"],
+["깔때기","funnel","triage"],
+["단계","stage","phase"],
+["후보","candidate"],
+["예측","prediction","predictive","predictor","forecast"],
+["특성 중요도","feature importance"],
+["회귀","regression","회귀계수","coefficient"],
+["적합도","모형","model"],
+["프로그램","program"],
+["표본","sample"],
+["약가","price","pricing"],
+["독성","toxicity","safety"],
+["유효성","efficacy"],
+["비교","comparison","compare"],
+["적응증","indication"],
+["치료영역","therapeutic area","therapy area"],
+["치료","therapy","treatment"]
+];
+var STOP={"of":1,"the":1,"and":1,"for":1,"by":1,"in":1,"a":1,"to":1,"rate":1,"rates":1,"payment":1,"payments":1,"의":1,"및":1,"indication":1,"indications":1,"적응증":1,"stage":1,"단계":1,"by":1,"per":1,"vs":1};
+var MW=[];G.forEach(function(g){g.forEach(function(t){if(t.indexOf(" ")>-1&&MW.indexOf(t)<0)MW.push(t)})});
+MW.sort(function(x,y){return y.length-x.length});
 var STG=/^phase(?:\s*)(i{1,3}|iv|[1-4])$/;
+var AL={"p1":"phase i","1상":"phase i","임상1상":"phase i","ph1":"phase i","p2":"phase ii","2상":"phase ii","임상2상":"phase ii","ph2":"phase ii","p3":"phase iii","3상":"phase iii","임상3상":"phase iii","ph3":"phase iii","nda":"nda/bla","bla":"nda/bla"};
+function tokenize(q){
+  q=q.toLowerCase().replace(/phase\s+(i{1,3}|iv|\d)(?![a-z])/g,"phase$1");
+  MW.forEach(function(t){if(q.indexOf(t)>-1)q=q.split(t).join(t.replace(/ /g,"_"))});
+  return q.split(/\s+/).filter(function(x){return x&&!STOP[x]}).map(function(x){x=x.replace(/_/g," ");return(x.length>2&&/[가-힣]별$/.test(x))?x.slice(0,-1):x}).filter(function(x){return!STOP[x]});
+}
+function mk(x){
+  if(STG.test(x)){var m=x.match(STG),r=ROM[m[1]]||m[1];return{re:new RegExp("phase "+r+"(?![ivx])")}}
+  if(x==="oncology"||x==="cancer"||x==="tumor")return{re:/(^|[^a-z-])oncology/};
+  return{s:x};
+}
 function alts(t){
-  t=t.toLowerCase();var m=t.match(STG);
-  if(m){var r=ROM[m[1]]||m[1];return [{re:new RegExp("phase "+r+"(?![ivx])")}]}
-  var a=AL[t],out=[],i;
-  if(a){a=[].concat(a);for(i=0;i<a.length;i++){var x=a[i];out.push(STG.test(x)?{re:new RegExp(x.replace(/phase (\w+)/,"phase $1")+"(?![ivx])")}:{s:x})}}
-  out.push(t==="oncology"||t==="종양"?{re:/(^|[^a-z-])oncology/}:{s:t});
-  if(a&&a.indexOf("oncology")>-1)out[0]={re:/(^|[^a-z-])oncology/};
+  var out=[],seen={};
+  function add(x){if(!seen[x]){seen[x]=1;out.push(mk(x))}}
+  if(AL[t])add(AL[t]);
+  add(t);
+  G.forEach(function(g){
+    var hit=false;
+    for(var i=0;i<g.length;i++){var term=g[i];if(term===t||(t.length>=3&&term.indexOf(t)===0)||(t.length>=2&&/[가-힣]/.test(t)&&term.indexOf(t)===0)){hit=true;break}}
+    if(hit)g.forEach(add);
+  });
   return out;
 }
 var HAY=R.map(function(r){
@@ -137,7 +212,7 @@ Object.keys(S).forEach(function(k){var o=document.createElement("option");o.valu
 var openState={},tableState={},shown={};
 function search(){
   var q=$("q").value.trim(),f=$("fam").value,sc=$("src").value,og=$("orig").checked;
-  var toks=q?q.replace(/phase\s+(i{1,3}|iv|\d)(?![a-z])/gi,"phase$1").split(/\s+/).filter(Boolean):[];
+  var toks=q?tokenize(q):[];
   var groups=toks.map(alts);
   var res=[];
   for(var i=0;i<R.length;i++){
