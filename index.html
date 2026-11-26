@@ -161,7 +161,17 @@ var G=[
 ["비교","comparison","compare"],
 ["적응증","indication"],
 ["치료영역","therapeutic area","therapy area"],
-["치료","therapy","treatment"]
+["치료","therapy","treatment"],
+["할인율","discount rate","wacc","자본비용","cost of capital","자기자본비용"],
+["세율","tax rate","법인세","실효세율"],
+["원가율","cogs","매출원가","cost of goods"],
+["판관비","판관비율","sg&a","판매관리비"],
+["개발비","r&d cost","development cost","임상비용","trial cost"],
+["환자당","per-patient","per patient"],
+["출시 곡선","launch curve","피크 도달","time to peak"],
+["이익률","margin","ebitda"],
+["딜 시점","licensing timing","거래 시점"],
+["학계","academia","academic","산학협력"]
 ];
 var STOP={"of":1,"the":1,"and":1,"for":1,"by":1,"in":1,"a":1,"to":1,"rate":1,"rates":1,"payment":1,"payments":1,"의":1,"및":1,"indication":1,"indications":1,"적응증":1,"stage":1,"단계":1,"by":1,"per":1,"vs":1};
 var MW=[];G.forEach(function(g){g.forEach(function(t){if(t.indexOf(" ")>-1&&MW.indexOf(t)<0)MW.push(t)})});
@@ -204,7 +214,7 @@ function fmt(r){
   if(u.indexOf("계수")===0)return String(+x.toPrecision(6));
   return String(+x.toPrecision(6))+u;
 }
-function isOrig(n){return n.indexOf("추정")!==0&&n.indexOf("파생")!==0&&n.indexOf("가정")<0&&n.indexOf("가상")<0}
+function isOrig(n){return n.indexOf("추정")!==0&&n.indexOf("파생")!==0&&n.indexOf("가정")<0&&n.indexOf("가상")<0&&n.indexOf("2차")!==0}
 function label(r){
   var p=[],st=r[C.stage],ind=r[C.indication],mo=r[C.modality],sg=r[C.segment];
   if(st&&st!=="All")p.push(st);if(ind&&ind!=="전체")p.push(ind);if(mo&&mo!=="전체")p.push(mo);if(sg&&sg!=="전체")p.push(sg);
@@ -223,9 +233,9 @@ function full(r){
   return a.join(", ");
 }
 function tokenize(q){var t=tokenize0(q);var ph=t.some(function(x){return STG.test(x)||AL[x]});return ph?t.filter(function(x){return x!=="임상"&&x!=="clinical"}):t}
-function natS(n){if(isOrig(n))return"원문값";var m=n.match(/^원문값\((.*)\)$/);return m?m[1]:n.replace(/\(.*$/,"")}
+function natS(n){if(/^2차/.test(n))return"2차 인용";if(n==="원문값(초록)")return"초록";if(isOrig(n))return"원문값";var m=n.match(/^원문값\((.*)\)$/);return m?m[1]:n.replace(/\(.*$/,"")}
 
-var SHORT={PAUL2010:"Paul 2010",COOK2014:"Cook 2014",WARING2015:"Waring 2015",MORGAN2018:"Morgan 2018",DOWDEN2019:"Dowden 2019",BIO2016:"BIO 2016",BIO2021:"BIO 2021",MCK2014:"McKinsey 2014",RIDLEY2015:"Ridley 2015",BTG2020:"Biotechgate 2020",PULLAN2019:"Pullan 2019",NEUENDORF2023:"Neuendorf 2023",TRIGEORGIS2023:"Trigeorgis 2023"};
+var SHORT={PAUL2010:"Paul 2010",COOK2014:"Cook 2014",WARING2015:"Waring 2015",MORGAN2018:"Morgan 2018",DOWDEN2019:"Dowden 2019",BIO2016:"BIO 2016",BIO2021:"BIO 2021",MCK2014:"McKinsey 2014",RIDLEY2015:"Ridley 2015",BTG2020:"Biotechgate 2020",PULLAN2019:"Pullan 2019",NEUENDORF2023:"Neuendorf 2023",TRIGEORGIS2023:"Trigeorgis 2023",HAY2014:"Hay 2014",DIMASI2010:"DiMasi 2010",TAKEBE2018:"Takebe 2018",WONG2019:"Wong 2019",HWANG2016:"Hwang 2016",DDT2021:"Drug Discov Today 2021",DDT2025:"Drug Discov Today 2025",ADC2023:"NRDD 2023 ADC",CUMMINGS:"Cummings",GLOBALDATA2024:"GlobalData 2024",BTG2021:"Biotechgate 2021",IQVIA2025:"IQVIA 2025",KALAMAS2003:"Kalamas 2003",BUHAY2025:"Buhay 2025",KALYANARAM2008:"Kalyanaram 2008",KALYANARAM1995:"Kalyanaram 1995",ROBEY2017:"Robey 2017",BCG2023:"BCG 2023",PHARMAGELLAN2016:"Pharmagellan 2016",DELOITTE2020:"Deloitte 2020",LEDLEY2020:"Ledley 2020 (JAMA)",HARDMAN2021:"Hardman 2021",RENSSELAER:"Rensselaer CBIS",MCK_ATO:"McKinsey (Against the odds)",DAMODARAN:"Damodaran 2026",DIMASI2016:"DiMasi 2016",SERTKAYA2024:"Sertkaya 2024",HHS2014:"HHS 2014",KHIDI2022:"KHIDI 2022",KDDF:"KDDF",BARAS2012:"Baras 2012",PWC_WACC:"PwC WACC",LEK2021:"L.E.K. 2021",ALACRITA:"Alacrita",FDA_STEP3:"FDA"};
 function sname(r){var k=F(r,"source_id");return SHORT[k]||((S[k]||{}).authors+" "+(S[k]||{}).year)}
 var BYM={},BYID={};
 R.forEach(function(r){(BYM[F(r,"metric_id")]=BYM[F(r,"metric_id")]||[]).push(r);BYID[F(r,"stat_id")]=r});
@@ -288,13 +298,16 @@ function cands(key){
     if(k==="I"||k==="II")add("COOK_BACKUP",function(r){return F(r,"stage")===s[2]&&F(r,"segment")==="전체 후보"});
     if(k==="II")add("DOWDEN_PROGRESSION",stg("Phase II->Phase III"));
     if(k==="N")add("BIO2016_REVIEW",function(r){return F(r,"segment")==="최종 승인"});
+    if(s){var NT=["WONG_POS","HAY_POS","DIMASI2010_POS","TAKEBE_POS","SERTKAYA_TRANS","GLOBALDATA_ONC","FDA_MOVE"];
+      NT.forEach(function(mid){add(mid,function(r){return F(r,"stage")===s[0]||(k==="III"&&F(r,"stage")==="Phase III->Approval")})})}
   }else if(t==="loa"&&s&&s[1]){
     add("BIO2021_LOA",stg(s[1]));add("BIO2016_LOA",stg(s[1]));
     add("DOWDEN_PROGRESSION",stg(s[3]));add("DOWDEN_AREA",stg(s[3]));add("PAUL_CUM",stg(s[3]));
     if(k==="III")add("DOWDEN_LATE",stg(s[3]));
+    ["WONG_POS","HAY_POS","DIMASI2010_POS","LOA_OTHER"].forEach(function(mid){add(mid,stg(s[1]))});
   }else if(t==="dur"){
     if(k==="T"){add("BIO2021_DURATION",stg("Phase I->Approval"))}
-    else if(s){add("BIO2021_DURATION",stg(s[0]));add("PAUL_CYCLE",stg(s[2]));if(k==="N")add("BIO2016_REVIEW_TIME")}
+    else if(s){add("BIO2021_DURATION",stg(s[0]));add("PAUL_CYCLE",stg(s[2]));add("PHASE_DURATION_OTHER",function(r){return F(r,"stage")===s[2]||(k==="N"&&F(r,"stage")==="FDA review")});if(k==="N")add("BIO2016_REVIEW_TIME")}
   }else if(t==="up"||t==="tot"||t==="ush"||t==="roy"){
     var mids={up:[["NEU_AVG_PAYMENT","Upfront"],["BTG_AVG_UPFRONT"],["TRI_MEDIAN_UPFRONT"],["PULLAN_UPFRONT"]],tot:[["NEU_AVG_PAYMENT","Total deal"],["BTG_AVG_DEALVALUE"]],ush:[["NEU_COMPOSITION","Upfront"],["BTG_UPFRONT_SHARE"]],roy:[["TRI_MEDIAN_ROYALTY"]]}[t];
     mids.forEach(function(m){add(m[0],function(r){return dn(F(r,"stage"))===k&&(!m[1]||F(r,"segment")===m[1])})});
