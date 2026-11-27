@@ -1,4 +1,4 @@
-var V="bench-v6-20261127";
+var V="bench-v7-20261127";
 var F=["./","index.html","data.js","manifest.webmanifest","icon-192.png","icon-512.png"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(V).then(function(c){return c.addAll(F)}).then(function(){return self.skipWaiting()}))});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==V}).map(function(x){return caches.delete(x)}))}).then(function(){return self.clients.claim()}))});
