@@ -67,6 +67,14 @@ td.na{color:var(--tx3);font-weight:400;cursor:default}
 .sd summary{padding:11px 12px;cursor:pointer;font-size:14px}
 .sd summary span{color:var(--tx3);font-size:12px}
 .sd .lst{border:0;border-top:.5px solid var(--bd);border-radius:0 0 12px 12px}
+.li small.fl{color:var(--wn)}
+.rbw{background:var(--card);border:.5px solid var(--bd);border-radius:12px;padding:4px 12px}
+.rb{padding:10px 0;border-bottom:.5px solid var(--bd)}.rb:last-child{border-bottom:0}
+.rbh{display:flex;justify-content:space-between;gap:8px;font-size:14px}.rbh b{font-weight:500}.rbh small{color:var(--tx3);font-size:12px}
+.rax{position:relative;height:22px;margin:2px 6px}.rax i{position:absolute;left:0;right:0;top:10px;height:1px;background:var(--bd2)}
+.rdot{position:absolute;top:5px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:var(--ac);opacity:.85;cursor:pointer}.rdot.o{background:var(--card);border:1.5px solid var(--wn);opacity:1}
+.vcs{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:2px}
+.vc{font:inherit;font-size:12px;border:.5px solid var(--bd);background:transparent;color:var(--tx2);border-radius:999px;padding:3px 9px;cursor:pointer}.vc b{font-weight:500;color:var(--tx)}.vc.o b{color:var(--wn)}
 .warn{background:var(--wnbg);color:var(--wn);border-radius:10px;padding:8px 12px;font-size:13px;margin:8px 0}
 #ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
 #sheet{display:none;position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:86vh;overflow-y:auto;background:var(--bg);border-radius:16px 16px 0 0;padding:6px 14px calc(24px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto}
@@ -398,9 +406,42 @@ var tmr;function toast(s){var e=$("toast");e.textContent=s;e.style.display="bloc
 
 /* ---------- views ---------- */
 function cnt(fams){var n=0;R.forEach(function(r){if(fams.indexOf((M[F(r,"metric_id")]||{}).family)>-1)n++});return n}
-function rowLi(r){var es=!isOrig(F(r,"nature")),bits=[F(r,"n")?"n="+nf(F(r,"n")):"",F(r,"period"),sname(r)+(F(r,"location")?", "+F(r,"location"):"")].filter(Boolean).join(", ");
-  var lb=[F(r,"stage"),E(F(r,"indication"))?"":ko(F(r,"indication")),E(F(r,"segment"))?"":tr(F(r,"segment")),F(r,"stat_type")==="min"?"(하한)":F(r,"stat_type")==="max"?"(상한)":""].filter(Boolean).join(" / ")||"전체";
-  return'<div class="li" data-id="'+esc(F(r,"stat_id"))+'" data-ck=""><div>'+esc(lb)+"<small>"+esc(bits)+'</small></div><div class="r">'+esc(mm(r))+'<small><span class="bd'+(es?" es":"")+'">'+esc(natS(F(r,"nature")))+"</span></small></div></div>"}
+var ALLSEG={"":1,"전체":1,"All":1,"전체 적응증":1,"전체 적응증(All)":1};
+function sv(r){var x=parseFloat(F(r,"value_std")),u=F(r,"unit_std");if(isNaN(x))return F(r,"value_std");
+  if(u==="fraction")return(Math.round(x*1000)/10)+"%";if(u==="년")return(Math.round(x*100)/100)+"년";
+  if(u==="USD m")return"$"+(x>=100?Math.round(x).toLocaleString("en-US"):+x.toPrecision(3))+"m";if(u==="USD")return"$"+Math.round(x).toLocaleString("en-US");
+  if(u==="배")return(+x.toPrecision(3))+"배";if(u==="건")return Math.round(x).toLocaleString("en-US")+"건";return(+x.toPrecision(4))+" "+u}
+var STX={min:"하한",max:"상한",mean:"평균",median:"중앙값",sd:"표준편차",coef:"계수",total:"합계",example:"예시",sens_low:"민감도 하단",sens_high:"민감도 상단",increase:"증가",decrease:"감소",fit:"적합도"};
+function rowLi(r){var es=!isOrig(F(r,"nature"));
+  var lb=[F(r,"stage_std"),F(r,"indication_std")==="전체"?"":F(r,"indication_std"),ALLSEG[F(r,"segment").trim()]?"":tr(F(r,"segment").trim()),F(r,"modality"),STX[F(r,"stat_type")]||""].filter(Boolean).join(", ")||"전체";
+  var bits=[sname(r)+(F(r,"location")?", "+F(r,"location"):""),F(r,"n")?"n="+nf(F(r,"n")):"",F(r,"period")].filter(Boolean).join(" | ");
+  var fl=F(r,"std_flag")?'<small class="fl">'+esc(F(r,"std_flag"))+"</small>":"";
+  return'<div class="li" data-id="'+esc(F(r,"stat_id"))+'" data-ck=""><div>'+esc(lb)+"<small>"+esc(bits)+"</small>"+fl+'</div><div class="r">'+esc(sv(r))+'<small><span class="bd'+(es?" es":"")+'">'+esc(natS(F(r,"nature")))+"</span></small></div></div>"}
+var SORD=["탐색","후보 선정","전임상","전임상→1상","1상","1상→2상","2상","2상→3상","3상","3상→허가 신청","허가 신청","허가 신청→승인","승인","전임상→승인","1상→승인","2상→승인","3상→승인","전임상→출시","1상→출시","2상→출시","3상→출시","후보 선정→출시"];
+function sord(a){var i=SORD.indexOf(a);return i<0?99:i}
+function byFam(fams){return R.filter(function(r){return fams.indexOf((M[F(r,"metric_id")]||{}).family)>=0})}
+function rangeBlock(title,cap,rows,opt){
+  opt=opt||{};var pts=["point","mean","median",""];
+  var c=rows.filter(function(r){return F(r,"stage_std")&&F(r,"indication_std")==="전체"&&(opt.anySeg||ALLSEG[F(r,"segment").trim()])&&!F(r,"modality")&&pts.indexOf(F(r,"stat_type"))>=0&&!isNaN(parseFloat(F(r,"value_std")))});
+  if(!c.length)return"";
+  var uc={};c.forEach(function(r){uc[F(r,"unit_std")]=(uc[F(r,"unit_std")]||0)+1});var u=Object.keys(uc).sort(function(a,b){return uc[b]-uc[a]})[0];
+  c=c.filter(function(r){return F(r,"unit_std")===u});
+  var g={};c.forEach(function(r){var k=opt.smap&&opt.smap[F(r,"stage_std")]||F(r,"stage_std"),s=opt.key?opt.key(r):F(r,"source_id");g[k]=g[k]||{};var p=g[k][s];
+    function sc(x){return[isOrig(F(x,"nature"))?1:0,F(x,"segment").trim()===""?1:0,F(x,"period")]}
+    if(!p){g[k][s]=r;return}var A=sc(r),B=sc(p);if(A[0]>B[0]||(A[0]===B[0]&&(A[1]>B[1]||(A[1]===B[1]&&A[2]>B[2]))))g[k][s]=r});
+  var ks=Object.keys(g).filter(function(k){return Object.keys(g[k]).length>=(opt.min||2)}).sort(function(a,b){return sord(a)-sord(b)||a.localeCompare(b)});
+  if(!ks.length)return"";
+  var all=[];ks.forEach(function(k){Object.keys(g[k]).forEach(function(s){all.push(parseFloat(F(g[k][s],"value_std")))})});
+  var lo=u==="fraction"?0:Math.min.apply(null,all),hi=u==="fraction"?1:Math.max.apply(null,all);if(hi===lo)hi=lo+1;
+  var h=ks.map(function(k){var rs=Object.keys(g[k]).map(function(s){return g[k][s]}).sort(function(a,b){return parseFloat(F(a,"value_std"))-parseFloat(F(b,"value_std"))});
+    var vs=rs.map(function(r){return parseFloat(F(r,"value_std"))}),md=vs.length%2?vs[(vs.length-1)/2]:(vs[vs.length/2-1]+vs[vs.length/2])/2;
+    var tmp={};tmp[C.value_std]=md;tmp[C.unit_std]=u;var mid=sv(tmp);
+    var lab=rs.length>1?sv(rs[0])+" ~ "+sv(rs[rs.length-1]):sv(rs[0]);
+    var dots=rs.map(function(r){var x=(parseFloat(F(r,"value_std"))-lo)/(hi-lo)*100;return'<span class="rdot'+(isOrig(F(r,"nature"))?"":" o")+'" style="left:'+Math.max(0,Math.min(100,x)).toFixed(1)+'%" data-id="'+esc(F(r,"stat_id"))+'" title="'+esc(sname(r))+'"></span>'}).join("");
+    var chips=rs.map(function(r){return'<button class="vc'+(isOrig(F(r,"nature"))?"":" o")+'" data-id="'+esc(F(r,"stat_id"))+'" data-ck="">'+esc(opt.lab?opt.lab(r):sname(r))+" <b>"+esc(sv(r))+"</b></button>"}).join("");
+    return'<div class="rb"><div class="rbh"><span>'+esc(k)+'</span><span><b>'+esc(lab)+"</b>"+(rs.length>2?' <small>중앙 '+esc(mid)+"</small>":"")+'</span></div><div class="rax"><i></i>'+dots+'</div><div class="vcs">'+chips+"</div></div>"}).join("");
+  return sec(title,(cap?cap+" ":"")+"전체 적응증 기준, 문헌마다 1개 값(원문값, 문헌의 대표값, 최근 기간 순으로 선택). 빈 점은 원문 표기값이 아닌 값입니다.",'<div class="rbw">'+h+"</div>");
+}
 function mm(r){var st=F(r,"stat_type");if(st!=="min"&&st!=="max")return fmt(r);var x=parseFloat(F(r,"value")),u=F(r,"unit");return u==="fraction"?(Math.round(x*1000)/10)+"%":String(+x.toPrecision(4))+(u==="fraction"?"":" "+u)}
 function listSec(title,cap,rows){if(!rows.length)return"";rows.sort(function(a,b){return sname(a).localeCompare(sname(b))});return sec(title,cap,'<div class="lst">'+rows.map(rowLi).join("")+"</div>")}
 function byMet(mid,fn){return(BYM[mid]||[]).filter(function(r){return!fn||fn(r)})}
@@ -411,7 +452,7 @@ function vRate(){
   var rest=a.filter(function(r){return r1.indexOf(r)<0&&r2.indexOf(r)<0&&r3.indexOf(r)<0});
   return listSec("rNPV 할인율","성공확률을 현금흐름에 반영한 뒤 쓰는 할인율입니다.",r1)+listSec("NPV 할인율(프로젝트 단계별)","위험을 할인율에 반영하는 방식이라 rNPV 할인율보다 높습니다.",r2)+listSec("WACC와 자본비용","기업 또는 산업의 자본비용입니다. 기업 단계별 바이오텍 값과 대형 제약사 값을 구분하십시오.",r3)+listSec("기타 할인율","",rest)+'<p class="foot">'+esc(STAR)+"</p>";
 }
-function vCost(){return famSecs(["개발비","임상 환자당 비용","임상 시험당 비용"])+'<p class="foot">통화 기준연도와 실패 비용, 자본비용 포함 여부가 문헌마다 다릅니다. '+esc(STAR)+"</p>"}
+function vCost(){return rangeBlock("문헌 간 단계별 개발비 범위","USD m, 단계별 평균 현금 지출(실패 비용 제외). 통화 기준연도가 다릅니다.",byFam(["개발비"]).filter(function(r){return/단계별 현금 지출|단계별 개발비 평균/.test(F(r,"segment"))}),{anySeg:1})+famSecs(["개발비","임상 환자당 비용","임상 시험당 비용"])+'<p class="foot">통화 기준연도와 실패 비용, 자본비용 포함 여부가 문헌마다 다릅니다. '+esc(STAR)+"</p>"}
 function vFin(){return famSecs(["원가율","판관비율","R&D 비율","이익률","법인세율"])+'<p class="foot">'+esc(STAR)+"</p>"}
 
 var KO={"Oncology":"종양","Non-oncology":"비종양","Non-Oncology":"비종양","Hematology":"혈액","Neurology":"신경","Psychiatry":"정신","Infectious disease":"감염","Autoimmune":"자가면역","Cardiovascular":"심혈관","Metabolic":"대사","Endocrine":"내분비","Respiratory":"호흡기","Ophthalmology":"안과","Urology":"비뇨","Allergy":"알레르기","Gastroenterology (non-IBD)":"소화기","Gastroenterology":"소화기","Others":"기타","Other":"기타","Solid":"고형암","Solid tumors":"고형암","Hematologic":"혈액암","Hematologic cancers":"혈액암","IO (면역항암)":"면역항암","Rare diseases":"희귀질환","Rare Diseases":"희귀질환","Chronic high prevalence":"만성 고유병","Chronic High Prevalence":"만성 고유병","Preselection biomarkers":"바이오마커 선별","Selection Biomarkers":"바이오마커 선별","No biomarkers":"바이오마커 없음","No Biomarkers":"바이오마커 없음","Small molecule":"저분자","Monoclonal antibody":"단일클론항체","Gene therapy":"유전자치료","Protein":"단백질","Peptide":"펩타이드","Vaccine":"백신","Antisense":"안티센스","Novel":"신규","Off-patent":"특허 만료","Biologic":"바이오의약품","Biosimilar":"바이오시밀러","Anti-infectives":"감염","Alimentary and metabolism":"소화, 대사","Musculoskeletal":"근골격","Nervous system":"신경계"};
@@ -497,6 +538,7 @@ function posDetail(){
   return h;
 }
 function vDur(){
+  var h0=rangeBlock("문헌 간 단계 기간 범위","단위 년(개월, 분기는 년으로 환산). BIO의 「1상→2상」 기간은 1상 기간으로 묶었습니다.",byFam(["단계 소요 기간","단계 사이클타임","허가 심사 기간"]),{smap:{"1상→2상":"1상","2상→3상":"2상","3상→허가 신청":"3상","허가 신청→승인":"허가 신청"}});
   var inds=[];sel("BIO2021_DURATION",stg("Phase I->Approval")).forEach(function(r){inds.push(F(r,"indication"))});
   inds.sort(function(a,b){var o={"전체":0,"Oncology":1};var x=o.hasOwnProperty(a)?o[a]:2,y=o.hasOwnProperty(b)?o[b]:2;return x-y||a.localeCompare(b)});
   var keys=[["Phase I->Phase II","I"],["Phase II->Phase III","II"],["Phase III->NDA/BLA","III"],["NDA/BLA->Approval","N"],["Phase I->Approval","T"]];
@@ -508,7 +550,7 @@ function vDur(){
   rv.sort(function(a,b){return a[0]==="전체"?-1:b[0]==="전체"?1:0});
   h+=sec("허가 심사 (BIO 2016)","2006-2015 최초 NDA/BLA 제출 건 기준입니다.",tbl(["적응증","기간(년)","1차 승인","최종 승인"],rv),STAR);
   h+=srcDet("기타 문헌의 단계 기간","단위(년, 개월)와 기간 정의가 문헌마다 다릅니다.",byMet("PHASE_DURATION_OTHER"));
-  return h;
+  return h0+h;
 }
 var DSTG=["Research","Preclinical","Phase I","Phase II","Phase III","승인 또는 시판","Multiple stages","전체"];
 var DSRC={
@@ -520,7 +562,12 @@ var DSRC={
 function vDeal(){
   var k=ST.dealSrc;if(!DSRC[k])k=ST.dealSrc="NEUENDORF2023";
   var d=DSRC[k];
-  var h='<p class="clab">문헌</p>'+chips("dealSrc",Object.keys(DSRC).map(function(x){return[x,DSRC[x].lab]}),k);
+  var oc=function(r){return F(r,"source_id")==="OCONNELL2014"?(/빅파마/.test(F(r,"segment"))?" 빅파마":" 중소기업"):""};
+  var up=bm(["NEU_AVG_PAYMENT","BTG_AVG_UPFRONT","PULLAN_UPFRONT","TRI_MEDIAN_UPFRONT","UPFRONT_AMOUNT_OTHER"]).filter(function(r){return F(r,"metric_id")!=="NEU_AVG_PAYMENT"||F(r,"segment")==="Upfront"});
+  var h=rangeBlock("문헌 간 선급금 범위","USD m. Trigeorgis는 중앙값, 나머지는 평균이며 표본 기간과 매수자 구분이 다릅니다.",up,{anySeg:1,key:function(r){return F(r,"source_id")+oc(r)},lab:function(r){return sname(r)+oc(r)}});
+  h+=rangeBlock("문헌 간 선급금 비중 범위","총 딜 가치 중 선급금 몫입니다.",byFam(["선급금 비중"]).filter(function(r){return!/M&A/.test(F(r,"segment"))}));
+  h+=rangeBlock("문헌 간 평균 딜 가치 범위","USD m.",byFam(["평균 딜 가치"]));
+  h+='<p class="clab" style="margin-top:14px">문헌별 상세</p>'+chips("dealSrc",Object.keys(DSRC).map(function(x){return[x,DSRC[x].lab]}),k);
   var rows=[];
   DSTG.forEach(function(s){var cs=d.cols.map(function(c){return c[2](s)});if(cs.some(Boolean))rows.push([s].concat(cs.map(function(r,i){return cell(r,d.cols[i][1]+":"+s,{n:d.n})})))});
   h+=sec("체결 단계별 딜 조건",d.cap,tbl(["체결 단계"].concat(d.cols.map(function(c){return c[0]})),rows),"선급금, 총 딜, 선급금 비중, 로열티 칸을 누르면 다른 문헌의 같은 단계 값이 나란히 나옵니다.");
@@ -553,7 +600,9 @@ function srcDet(title,cap,rows){
 }
 function bm(ids){var a=[];ids.forEach(function(k){a=a.concat(byMet(k))});return a}
 function vPosEtc(){
-  var h='<p class="cap" style="margin-top:8px">BIO 비교표 밖의 문헌별 성공률입니다. 문헌을 누르면 펼쳐지고, 값을 누르면 정의와 출처가 나옵니다.</p>';
+  var h=rangeBlock("문헌 간 단계 성공률 범위","",byFam(["단계 성공확률"]));
+  h+=rangeBlock("문헌 간 LOA 범위","해당 단계에서 승인 또는 출시까지 갈 확률입니다.",byFam(["LOA(승인 확률)","누적 성공확률"]));
+  h+='<p class="cap" style="margin-top:14px">아래는 문헌별 전체 값입니다. 문헌을 누르면 펼쳐지고, 값을 누르면 정의와 출처가 나옵니다.</p>';
   h+=srcDet("단계 성공률","단계 진입 후 다음 단계로 넘어갈 확률입니다.",bm(["HAY_POS","WONG_POS","DIMASI2010_POS","TAKEBE_POS","SERTKAYA_TRANS","GLOBALDATA_ONC","FDA_MOVE","POS_OTHER","COOK_STAGE_SUCCESS","COOK_BACKUP","DOWDEN_LATE","MORGAN_LEAD_TRANSITION"]));
   h+=srcDet("LOA와 누적 성공확률","해당 단계에서 승인까지 갈 확률입니다.",bm(["LOA_OTHER","PAUL_CUM","COOK_CUM","MORGAN_CUM"]));
   h+=srcDet("치료영역별, 바이오마커별","",bm(["DOWDEN_AREA","WONG_BIOMARKER"]));
