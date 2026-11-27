@@ -134,6 +134,10 @@ var G=[
 ["딜 가치","딜 총액","deal value","deal size","total deal","total potential value"],
 ["딜 건수","number of deals","deal count","deals"],
 ["딜","deal"],
+["인수","인수가","m&a","acquisition","acquired","acquisitions"],
+["수익률","투자배수","return","multiple","irr"],
+["예측 오차","예측","forecast","forecasting","consensus"],
+["가치 배분","배분","split","value share"],
 ["라이선스","라이선싱","license","licensing","licence"],
 ["계약","contract","agreement"],
 ["구조","structure"],
@@ -237,7 +241,7 @@ function full(r){
 function tokenize(q){var t=tokenize0(q);var ph=t.some(function(x){return STG.test(x)||AL[x]});return ph?t.filter(function(x){return x!=="임상"&&x!=="clinical"}):t}
 function natS(n){if(/^2차/.test(n))return"2차 인용";if(n==="원문값(초록)")return"초록";if(isOrig(n))return"원문값";var m=n.match(/^원문값\((.*)\)$/);return m?m[1]:n.replace(/\(.*$/,"")}
 
-var SHORT={PAUL2010:"Paul 2010",COOK2014:"Cook 2014",WARING2015:"Waring 2015",MORGAN2018:"Morgan 2018",DOWDEN2019:"Dowden 2019",BIO2016:"BIO 2016",BIO2021:"BIO 2021",MCK2014:"McKinsey 2014",RIDLEY2015:"Ridley 2015",BTG2020:"Biotechgate 2020",PULLAN2019:"Pullan 2019",NEUENDORF2023:"Neuendorf 2023",TRIGEORGIS2023:"Trigeorgis 2023",HAY2014:"Hay 2014",DIMASI2010:"DiMasi 2010",TAKEBE2018:"Takebe 2018",WONG2019:"Wong 2019",HWANG2016:"Hwang 2016",DDT2021:"Drug Discov Today 2021",DDT2025:"Drug Discov Today 2025",ADC2023:"NRDD 2023 ADC",CUMMINGS:"Cummings",GLOBALDATA2024:"GlobalData 2024",BTG2021:"Biotechgate 2021",IQVIA2025:"IQVIA 2025",KALAMAS2003:"Kalamas 2003",BUHAY2025:"Buhay 2025",KALYANARAM2008:"Kalyanaram 2008",KALYANARAM1995:"Kalyanaram 1995",ROBEY2017:"Robey 2017",BCG2023:"BCG 2023",PHARMAGELLAN2016:"Pharmagellan 2016",DELOITTE2020:"Deloitte 2020",LEDLEY2020:"Ledley 2020 (JAMA)",HARDMAN2021:"Hardman 2021",RENSSELAER:"Rensselaer CBIS",MCK_ATO:"McKinsey 2022",DAMODARAN:"Damodaran 2026",DIMASI2016:"DiMasi 2016",SERTKAYA2024:"Sertkaya 2024",HHS2014:"HHS 2014",KHIDI2022:"KHIDI 2022",KDDF:"KDDF",BARAS2012:"Baras 2012",PWC_WACC:"PwC WACC",LEK2021:"L.E.K. 2021",ALACRITA:"Alacrita",FDA_STEP3:"FDA",ASPE2024:"ASPE 2024"};
+var SHORT={PAUL2010:"Paul 2010",COOK2014:"Cook 2014",WARING2015:"Waring 2015",MORGAN2018:"Morgan 2018",DOWDEN2019:"Dowden 2019",BIO2016:"BIO 2016",BIO2021:"BIO 2021",MCK2014:"McKinsey 2014",RIDLEY2015:"Ridley 2015",BTG2020:"Biotechgate 2020",PULLAN2019:"Pullan 2019",NEUENDORF2023:"Neuendorf 2023",TRIGEORGIS2023:"Trigeorgis 2023",HAY2014:"Hay 2014",DIMASI2010:"DiMasi 2010",TAKEBE2018:"Takebe 2018",WONG2019:"Wong 2019",HWANG2016:"Hwang 2016",DDT2021:"Drug Discov Today 2021",DDT2025:"Drug Discov Today 2025",ADC2023:"NRDD 2023 ADC",CUMMINGS:"Cummings",GLOBALDATA2024:"GlobalData 2024",BTG2021:"Biotechgate 2021",IQVIA2025:"IQVIA 2025",KALAMAS2003:"Kalamas 2003",BUHAY2025:"Buhay 2025",KALYANARAM2008:"Kalyanaram 2008",KALYANARAM1995:"Kalyanaram 1995",ROBEY2017:"Robey 2017",BCG2023:"BCG 2023",PHARMAGELLAN2016:"Pharmagellan 2016",DELOITTE2020:"Deloitte 2020",LEDLEY2020:"Ledley 2020 (JAMA)",HARDMAN2021:"Hardman 2021",RENSSELAER:"Rensselaer CBIS",MCK_ATO:"McKinsey 2022",MICHAELI2022A:"Michaeli 2022 (TIRS)",MICHAELI2022B:"Michaeli 2022 (EJHE)",OCONNELL2014:"O'Connell 2014",CHA2013:"Cha 2013",NELSON1998:"Nelson 1998",STEWART2001:"Stewart 2001",FREI2016:"Frei 2016",WOO2019:"Woo 2019",DAMODARAN:"Damodaran 2026",DIMASI2016:"DiMasi 2016",SERTKAYA2024:"Sertkaya 2024",HHS2014:"HHS 2014",KHIDI2022:"KHIDI 2022",KDDF:"KDDF",BARAS2012:"Baras 2012",PWC_WACC:"PwC WACC",LEK2021:"L.E.K. 2021",ALACRITA:"Alacrita",FDA_STEP3:"FDA",ASPE2024:"ASPE 2024"};
 function sname(r){var k=F(r,"source_id");return SHORT[k]||((S[k]||{}).authors+" "+(S[k]||{}).year)}
 var BYM={},BYID={};
 R.forEach(function(r){(BYM[F(r,"metric_id")]=BYM[F(r,"metric_id")]||[]).push(r);BYID[F(r,"stat_id")]=r});
@@ -300,7 +304,7 @@ function cands(key){
     if(k==="I"||k==="II")add("COOK_BACKUP",function(r){return F(r,"stage")===s[2]&&F(r,"segment")==="전체 후보"});
     if(k==="II")add("DOWDEN_PROGRESSION",stg("Phase II->Phase III"));
     if(k==="N")add("BIO2016_REVIEW",function(r){return F(r,"segment")==="최종 승인"});
-    if(s){var NT=["WONG_POS","HAY_POS","DIMASI2010_POS","TAKEBE_POS","SERTKAYA_TRANS","GLOBALDATA_ONC","FDA_MOVE"];
+    if(s){var NT=["WONG_POS","HAY_POS","DIMASI2010_POS","TAKEBE_POS","SERTKAYA_TRANS","GLOBALDATA_ONC","FDA_MOVE","POS_OTHER"];
       NT.forEach(function(mid){add(mid,function(r){return F(r,"stage")===s[0]||(k==="III"&&F(r,"stage")==="Phase III->Approval")})})}
   }else if(t==="loa"&&s&&s[1]){
     add("BIO2021_LOA",stg(s[1]));add("BIO2016_LOA",stg(s[1]));
@@ -534,7 +538,7 @@ function vDeal(){
   }else if(k==="PULLAN2019"){
     h+=sec("치료영역당 딜 소싱 깔때기 (Pullan p.6)","대형 제약사의 대략적 건수(typical breakdown)입니다.",tbl(["단계","건수"],sel("PULLAN_FUNNEL").map(function(r){return[F(r,"segment"),cell(r)]})));
   }
-  h+=listSec("기타 문헌의 선급금 비중","",byMet("UPFRONT_SHARE_OTHER"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"));
+  h+=listSec("기타 문헌의 평균 선급금","USD m. 빅파마와 중소기업 도입을 구분한 O'Connell 2014 등입니다.",byMet("UPFRONT_AMOUNT_OTHER"))+listSec("기타 문헌의 선급금 비중","M&A 선지급 비중(Michaeli 2022)은 라이선스 계약금 비중과 다릅니다.",byMet("UPFRONT_SHARE_OTHER"))+listSec("라이선서와 라이선시 가치 배분","",byMet("VALUE_SPLIT"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"))+listSec("단계별 바이오 기업 인수가","대표 파이프라인 단계별 M&A 총 거래가(USD m, 2020년 물가). 같은 311건인데 두 논문의 값이 일부 다릅니다.",byMet("ACQ_VALUE_STAGE"))+listSec("인수가 프리미엄","",byMet("ACQ_PREMIUM"))+listSec("투자배수와 연 수익률","전임상부터 승인까지 보유 가정, 실패 반영.",byMet("INVEST_MULTIPLE").concat(byMet("INVEST_RETURN")));
   return h+'<p class="foot">'+esc(STAR)+"</p>";
 }
 function vShare(){
@@ -549,6 +553,7 @@ function vShare(){
   h+=sec("조건별 선도자 우위 (McKinsey Exhibit 3)","단위 %p.",tbl(["조건","우위"],cd));
   h+=listSec("기타 문헌의 진입 순서별 점유율","McKinsey, Ridley와 정의가 다릅니다.",byMet("SHARE_ORDER_OTHER"));
   h+=listSec("출시 후 피크 도달 기간","",byMet("LAUNCH_CURVE").concat(byMet("PEAK_TIMING_MODEL")));
+  h+=listSec("매출 예측 오차 (Cha 2013)","컨센서스 피크 매출 추정과 실제 피크의 차이입니다. 매출 민감도 범위의 근거로 쓸 수 있습니다.",byMet("FORECAST_ERROR"));
   h+=sec("시대별 선도자 우위 (McKinsey 본문)","",tbl(["구분","우위"],sel("MCK_ADV_ERA").map(function(r){return[F(r,"period")||F(r,"segment"),cell(r)]})),STAR);
   return h;
 }
