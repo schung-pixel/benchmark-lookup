@@ -14,9 +14,16 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 -apple-system,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;-webkit-text-size-adjust:100%}
 body.lock{overflow:hidden}
-.wrap{max-width:760px;margin:0 auto;padding:0 12px calc(40px + env(safe-area-inset-bottom))}
-header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:6px;padding:12px 0 8px;min-height:52px}
+.wrap{max-width:760px;margin:0 auto;padding:0 12px calc(84px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:6px;padding:0;height:56px}
 header h1{font-size:17px;font-weight:500;margin:0;flex:1}
+#srbtn{border:.5px solid var(--bd2);background:var(--card);color:var(--tx);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+#srbtn svg{width:18px;height:18px}
+.subs{position:sticky;top:56px;z-index:4;background:var(--bg);padding:2px 0 8px;margin:0 0 4px;border-bottom:.5px solid var(--bd)}
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:.5px solid var(--bd);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
+#tabs button{border:0;background:transparent;color:var(--tx3);font:inherit;font-size:12px;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+#tabs button svg{width:22px;height:22px}
+#tabs button.on{color:var(--ac);font-weight:500}
 #back{display:none;border:0;background:transparent;color:var(--tx);font-size:22px;line-height:1;padding:4px 8px 4px 0;cursor:pointer}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:4px 0 12px}
 .gh3{font-size:13px;font-weight:500;color:var(--tx2);margin:14px 2px 6px}
@@ -88,9 +95,11 @@ label.tg{font-size:13px;color:var(--tx2);display:flex;gap:6px;align-items:center
 </head>
 <body>
 <div class="wrap">
-<header><button id="back" aria-label="뒤로">&#8249;</button><h1 id="ttl">벤치마크 조회</h1></header>
+<header><button id="back" aria-label="뒤로">&#8249;</button><h1 id="ttl">벤치마크 조회</h1><button id="srbtn" aria-label="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button></header>
+<div id="subs" class="subs"></div>
 <main id="view"></main>
 </div>
+<nav id="tabs" aria-label="주요 화면"><button data-tab="p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>확률, 기간</button><button data-tab="d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="M4 12h16"/></svg>딜, M&amp;A</button><button data-tab="s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M5 15l4-4 3 3 7-7"/></svg>매출</button><button data-tab="f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2"/></svg>재무</button></nav>
 <div id="ov"></div>
 <div id="sheet" role="dialog" aria-modal="true"></div>
 <div id="toast"></div>
@@ -401,17 +410,6 @@ function vRate(){
 function vCost(){return famSecs(["개발비","임상 환자당 비용","임상 시험당 비용"])+'<p class="foot">통화 기준연도와 실패 비용, 자본비용 포함 여부가 문헌마다 다릅니다. '+esc(STAR)+"</p>"}
 function vFin(){return famSecs(["원가율","판관비율","R&D 비율","이익률","법인세율"])+'<p class="foot">'+esc(STAR)+"</p>"}
 
-function vHome(){
-  var G3=[["확률과 기간",[["pos","rNPV 성공확률","문헌별 단계 전이율, LOA, 기간 비교"],["dur","개발 기간","단계별 소요 기간, 허가 심사 기간"]]],
-    ["거래와 매출",[["deal","L/O 딜 조건","선급금, 마일스톤, 로열티, 딜 규모"],["share","매출 추정","출시 순서별 점유율, 피크 도달"]]],
-    ["재무 가정",[["rate","할인율, WACC",cnt(["할인율(자본비용)"])+"건"],["cost","개발비",cnt(["개발비","임상 환자당 비용","임상 시험당 비용"])+"건, 임상비용 포함"],["fin","원가, 판관비, 세율",cnt(["원가율","판관비율","R&D 비율","이익률","법인세율"])+"건"]]]];
-  var h="";
-  G3.forEach(function(g){h+='<p class="gh3">'+esc(g[0])+'</p><div class="tiles">';g[1].forEach(function(x){h+='<button class="tile" data-go="'+x[0]+'"><b>'+esc(x[1])+"</b><span>"+esc(x[2])+"</span></button>"});h+="</div>"});
-  h+='<input class="srch" id="hq" type="search" placeholder="직접 검색: 로열티, Phase II 종양" enterkeyhint="search" autocomplete="off">';
-  h+='<button class="lnk" data-go="list">그 밖의 통계 전체 목록 (종결 사유, 허가 심사 등) &#8250;</button>';
-  h+='<p class="foot" style="margin-top:16px">수록 통계 '+R.length+"건, 문헌 "+Object.keys(S).length+"편. 수치는 각 문헌 원문 값을 옮긴 것이며 원문 PDF는 포함하지 않습니다. 인용 전에 원문으로 확인하십시오. 데이터 기준일 "+esc(DB.built)+".</p>";
-  return h;
-}
 var KO={"Oncology":"종양","Non-oncology":"비종양","Non-Oncology":"비종양","Hematology":"혈액","Neurology":"신경","Psychiatry":"정신","Infectious disease":"감염","Autoimmune":"자가면역","Cardiovascular":"심혈관","Metabolic":"대사","Endocrine":"내분비","Respiratory":"호흡기","Ophthalmology":"안과","Urology":"비뇨","Allergy":"알레르기","Gastroenterology (non-IBD)":"소화기","Gastroenterology":"소화기","Others":"기타","Other":"기타","Solid":"고형암","Solid tumors":"고형암","Hematologic":"혈액암","Hematologic cancers":"혈액암","IO (면역항암)":"면역항암","Rare diseases":"희귀질환","Rare Diseases":"희귀질환","Chronic high prevalence":"만성 고유병","Chronic High Prevalence":"만성 고유병","Preselection biomarkers":"바이오마커 선별","Selection Biomarkers":"바이오마커 선별","No biomarkers":"바이오마커 없음","No Biomarkers":"바이오마커 없음","Small molecule":"저분자","Monoclonal antibody":"단일클론항체","Gene therapy":"유전자치료","Protein":"단백질","Peptide":"펩타이드","Vaccine":"백신","Antisense":"안티센스","Novel":"신규","Off-patent":"특허 만료","Biologic":"바이오의약품","Biosimilar":"바이오시밀러","Anti-infectives":"감염","Alimentary and metabolism":"소화, 대사","Musculoskeletal":"근골격","Nervous system":"신경계"};
 function ko(v){return KO[v]&&!/[가-힣]/.test(v)?KO[v]+" "+v:v}
 function skey(s){s=tr(s).toLowerCase();return s==="selection biomarkers"?"preselection biomarkers":s}
@@ -538,7 +536,28 @@ function vDeal(){
   }else if(k==="PULLAN2019"){
     h+=sec("치료영역당 딜 소싱 깔때기 (Pullan p.6)","대형 제약사의 대략적 건수(typical breakdown)입니다.",tbl(["단계","건수"],sel("PULLAN_FUNNEL").map(function(r){return[F(r,"segment"),cell(r)]})));
   }
-  h+=listSec("기타 문헌의 평균 선급금","USD m. 빅파마와 중소기업 도입을 구분한 O'Connell 2014 등입니다.",byMet("UPFRONT_AMOUNT_OTHER"))+listSec("기타 문헌의 선급금 비중","M&A 선지급 비중(Michaeli 2022)은 라이선스 계약금 비중과 다릅니다.",byMet("UPFRONT_SHARE_OTHER"))+listSec("라이선서와 라이선시 가치 배분","",byMet("VALUE_SPLIT"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"))+listSec("단계별 바이오 기업 인수가","대표 파이프라인 단계별 M&A 총 거래가(USD m, 2020년 물가). 같은 311건인데 두 논문의 값이 일부 다릅니다.",byMet("ACQ_VALUE_STAGE"))+listSec("인수가 프리미엄","",byMet("ACQ_PREMIUM"))+listSec("투자배수와 연 수익률","전임상부터 승인까지 보유 가정, 실패 반영.",byMet("INVEST_MULTIPLE").concat(byMet("INVEST_RETURN")));
+  var lic=byMet("UPFRONT_SHARE_OTHER").filter(function(r){return!/M&A/.test(F(r,"segment"))});
+  h+=listSec("기타 문헌의 평균 선급금","USD m. 빅파마와 중소기업 도입을 구분한 O'Connell 2014 등입니다.",byMet("UPFRONT_AMOUNT_OTHER"))+listSec("기타 문헌의 선급금 비중","",lic)+listSec("라이선서와 라이선시 가치 배분","",byMet("VALUE_SPLIT"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"));
+  return h+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function vMA(){
+  var STG=[["Preclinical","전임상"],["Phase I","1상"],["Phase II","2상"],["Phase III","3상"],["Approved","승인"]];
+  function ms(src,mid,st,f){return one(mid,function(r){return F(r,"source_id")===src&&F(r,"stage")===st&&(!f||f(r))})}
+  var mna=function(r){return/M&A/.test(F(r,"segment"))};
+  var h=sec("대표 파이프라인 단계별 인수가와 선지급 비중","2005-2020 미국, 유럽 바이오 기업 인수 311건(Michaeli 2022). 인수가는 평균 총 거래가, USD m, 2020년 물가. 같은 표본인데 TIRS 표와 EJHE 본문 값이 다릅니다.",
+    tbl(["단계","TIRS 표 1","EJHE 본문","선지급 비중"],STG.map(function(x){return[x[1],cell(ms("MICHAELI2022A","ACQ_VALUE_STAGE",x[0])),cell(ms("MICHAELI2022B","ACQ_VALUE_STAGE",x[0])),cell(ms("MICHAELI2022B","UPFRONT_SHARE_OTHER",x[0],mna))]})),
+    "선지급 비중은 인수 거래가 중 선지급 몫이며 라이선스 계약금 비중과 다릅니다.");
+  var segs=[];sel("INVEST_MULTIPLE").forEach(function(r){var g=F(r,"segment");if(segs.indexOf(g)<0)segs.push(g)});
+  h+=sec("투자배수와 연 수익률 (Michaeli 2022 TIRS 표 2)","전임상부터 승인까지 지분 보유 가정, 개발 실패 반영.",
+    tbl(["구분","투자배수","연 수익률"],segs.map(function(g){function q(m){return one(m,function(r){return F(r,"segment")===g})}return[g,cell(q("INVEST_MULTIPLE")),cell(q("INVEST_RETURN"))]})));
+  h+=listSec("인수가 프리미엄","회귀분석 추정치입니다.",byMet("ACQ_PREMIUM"));
+  h+=listSec("전체 표본 인수가","",byMet("ACQ_VALUE_STAGE").filter(function(r){return F(r,"stage")==="전체"}));
+  return h+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function vFc(){
+  var h=listSec("출시 후 피크 도달 기간","",byMet("LAUNCH_CURVE").concat(byMet("PEAK_TIMING_MODEL")));
+  h+=listSec("출시 연차별 피크 대비 매출","",byMet("LAUNCH_SHARE_PEAK"));
+  h+=listSec("매출 예측 오차 (Cha 2013)","컨센서스 피크 매출 추정과 실제 피크의 차이입니다. 매출 민감도 범위의 근거로 쓸 수 있습니다.",byMet("FORECAST_ERROR"));
   return h+'<p class="foot">'+esc(STAR)+"</p>";
 }
 function vShare(){
@@ -552,8 +571,6 @@ function vShare(){
   var cd=sel("MCK_ADV_COND").map(function(r){var s=F(r,"segment").split(" = ");return[s[0]+": "+(s[1]||"").replace(/\s*\(.*\)$/,""),cell(r)]});
   h+=sec("조건별 선도자 우위 (McKinsey Exhibit 3)","단위 %p.",tbl(["조건","우위"],cd));
   h+=listSec("기타 문헌의 진입 순서별 점유율","McKinsey, Ridley와 정의가 다릅니다.",byMet("SHARE_ORDER_OTHER"));
-  h+=listSec("출시 후 피크 도달 기간","",byMet("LAUNCH_CURVE").concat(byMet("PEAK_TIMING_MODEL")));
-  h+=listSec("매출 예측 오차 (Cha 2013)","컨센서스 피크 매출 추정과 실제 피크의 차이입니다. 매출 민감도 범위의 근거로 쓸 수 있습니다.",byMet("FORECAST_ERROR"));
   h+=sec("시대별 선도자 우위 (McKinsey 본문)","",tbl(["구분","우위"],sel("MCK_ADV_ERA").map(function(r){return[F(r,"period")||F(r,"segment"),cell(r)]})),STAR);
   return h;
 }
@@ -607,7 +624,7 @@ function search(){
 function render(){
   var o=search(),out=$("out"),res=o.res;
   if(!out)return;
-  if(!o.q&&!o.f&&!o.sc){out.innerHTML='<div class="empty">검색어를 입력하거나 분류를 고르십시오.<br>한국어와 영어 모두 검색됩니다.</div>';return}
+  if(!o.q&&!o.f&&!o.sc){out.innerHTML='<div class="empty">검색어를 입력하거나 분류를 고르십시오.<br>한국어와 영어 모두 검색됩니다.</div><button class="lnk" data-go="list">통계 전체 목록 (분류별) &#8250;</button><p class="foot" style="margin-top:16px">수록 통계 '+R.length+"건, 문헌 "+Object.keys(S).length+"편. 수치는 각 문헌 원문 값을 옮긴 것이며 원문 PDF는 포함하지 않습니다. 인용 전에 원문으로 확인하십시오. 데이터 기준일 "+esc(DB.built)+".</p>";return}
   if(!res.length){out.innerHTML='<div class="empty">일치하는 통계가 없습니다.<br>키워드를 줄이거나 분류, 문헌 필터를 해제해 보십시오.</div>';return}
   var by={},order=[];
   res.forEach(function(r){var k=r[C.metric_id];if(!by[k]){by[k]=[];order.push(k)}by[k].push(r)});
@@ -652,19 +669,31 @@ function autoCk(r){
   return"";
 }
 /* ---------- router ---------- */
-var TT={"":"벤치마크 조회",rate:"할인율, WACC",cost:"개발비",fin:"원가, 판관비, 세율",pos:"rNPV 성공확률",dur:"개발 기간",deal:"L/O 딜 조건",share:"매출 추정",list:"통계 전체 목록",search:"검색"};
+var TABS={p:["확률과 기간",[["pos","성공확률"],["dur","개발 기간"]]],d:["딜과 M&A",[["deal","라이선스 딜"],["ma","M&A, 투자 수익률"]]],s:["매출 추정",[["share","출시 순서 점유율"],["fc","출시 곡선, 예측 오차"]]],f:["재무 가정",[["rate","할인율, WACC"],["cost","개발비"],["fin","원가, 판관비, 세율"]]]};
+var V2T={};Object.keys(TABS).forEach(function(t){TABS[t][1].forEach(function(x){V2T[x[0]]=t})});
+var TT={list:"통계 전체 목록",search:"검색과 정보"};Object.keys(TABS).forEach(function(t){TABS[t][1].forEach(function(x){TT[x[0]]=TABS[t][0]})});
+var VIEWS;
+function lastOf(t){try{var v=localStorage.getItem("bm_tab_"+t);if(v&&V2T[v]===t)return v}catch(e){}return TABS[t][1][0][0]}
 function route(){
   if(sheetOpen)closeSheet();
   var h=location.hash.replace(/^#\/?/,""),v=h.split("?")[0];
-  if(!TT.hasOwnProperty(v))v="";
-  $("ttl").textContent=TT[v];$("back").style.display=v?"block":"none";
-  var html={"":vHome,rate:vRate,cost:vCost,fin:vFin,pos:vPos,dur:vDur,deal:vDeal,share:vShare,list:vList,search:vSearch}[v]();
-  $("view").innerHTML=html;window.scrollTo(0,0);
+  VIEWS=VIEWS||{rate:vRate,cost:vCost,fin:vFin,pos:vPos,dur:vDur,deal:vDeal,ma:vMA,share:vShare,fc:vFc,list:vList,search:vSearch};
+  if(!TT.hasOwnProperty(v)){var lt="p";try{lt=localStorage.getItem("bm_last_tab")||"p"}catch(e){}if(!TABS[lt])lt="p";location.replace("#"+lastOf(lt));return}
+  var t=V2T[v]||"";
+  $("ttl").textContent=TT[v];$("back").style.display=t?"none":"block";$("srbtn").style.display=t?"flex":"none";
+  if(t){try{localStorage.setItem("bm_tab_"+t,v);localStorage.setItem("bm_last_tab",t)}catch(e){}}
+  var sb=$("subs");
+  if(t&&TABS[t][1].length>1){sb.style.display="block";sb.innerHTML='<div class="chips" role="tablist">'+TABS[t][1].map(function(x){return'<button class="chip'+(x[0]===v?" on":"")+'" role="tab" aria-selected="'+(x[0]===v)+'" data-sub="'+x[0]+'">'+esc(x[1])+"</button>"}).join("")+"</div>"}
+  else{sb.style.display="none";sb.innerHTML=""}
+  [].forEach.call(document.querySelectorAll("#tabs button"),function(b){var on=b.getAttribute("data-tab")===t;b.classList.toggle("on",on);b.setAttribute("aria-current",on?"page":"false")});
+  $("view").innerHTML=VIEWS[v]();window.scrollTo(0,0);
   if(v==="search")initSearch();
-  if(v===""){var hq=$("hq");hq.addEventListener("keydown",function(e){if(e.key==="Enter"){SQ={q:hq.value,f:"",sc:"",og:false};location.hash="search"}})}
 }
-function rerender(){var y=window.scrollY;$("view").innerHTML={rate:vRate,cost:vCost,fin:vFin,pos:vPos,dur:vDur,deal:vDeal,share:vShare}[location.hash.replace(/^#\/?/,"")]();window.scrollTo(0,y)}
+function rerender(){var y=window.scrollY,v=location.hash.replace(/^#\/?/,"");if(!VIEWS[v]||v==="search")return;$("view").innerHTML=VIEWS[v]();window.scrollTo(0,y)}
 $("back").addEventListener("click",function(){if(history.length>1)history.back();else location.hash=""});
+$("srbtn").addEventListener("click",function(){location.hash="search"});
+$("subs").addEventListener("click",function(e){var b=e.target.closest("[data-sub]");if(b)location.replace("#"+b.getAttribute("data-sub"))});
+$("tabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]");if(!b)return;var t=b.getAttribute("data-tab"),cur=V2T[location.hash.replace(/^#\/?/,"")];if(cur===t){window.scrollTo({top:0,behavior:"smooth"});return}location.hash=lastOf(t)});
 $("view").addEventListener("click",function(e){
   var t=e.target,b;
   b=t.closest("[data-go]");if(b){location.hash=b.getAttribute("data-go");return}
