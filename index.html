@@ -18,8 +18,10 @@ body.lock{overflow:hidden}
 header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:6px;padding:12px 0 8px;min-height:52px}
 header h1{font-size:17px;font-weight:500;margin:0;flex:1}
 #back{display:none;border:0;background:transparent;color:var(--tx);font-size:22px;line-height:1;padding:4px 8px 4px 0;cursor:pointer}
-.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:4px 0 14px}
-.tile{display:block;text-align:left;background:var(--card);border:.5px solid var(--bd);border-radius:12px;padding:14px 12px;color:var(--tx);cursor:pointer;font:inherit;min-height:92px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:4px 0 12px}
+.gh3{font-size:13px;font-weight:500;color:var(--tx2);margin:14px 2px 6px}
+.gh3:first-child{margin-top:4px}
+.tile{display:block;text-align:left;background:var(--card);border:.5px solid var(--bd);border-radius:12px;padding:14px 12px;color:var(--tx);cursor:pointer;font:inherit;min-height:84px}
 .tile b{display:block;font-size:15px;font-weight:500;margin-bottom:4px}
 .tile span{font-size:12px;color:var(--tx2);line-height:1.45}
 .srch{width:100%;height:44px;border:.5px solid var(--bd2);border-radius:10px;padding:0 12px;font-size:16px;background:var(--card);color:var(--tx)}
@@ -354,7 +356,7 @@ function openSheet(id,key,push){
   if(F(r,"n"))h+='<p class="kv"><b>n</b> '+esc(nf(F(r,"n")))+"</p>";
   if(F(r,"period"))h+='<p class="kv"><b>기간</b> '+esc(F(r,"period"))+"</p>";
   if(F(r,"population"))h+='<p class="kv"><b>모집단</b> '+esc(F(r,"population"))+"</p>";
-  h+='<p class="kv"><b>출처</b> '+esc(s.authors)+" ("+esc(s.year)+"). "+esc(s.title)+". "+esc(s.journal_or_publisher)+(F(r,"location")?", "+esc(F(r,"location")):"")+"</p>";
+  h+='<p class="kv"><b>출처</b> '+esc(s.authors)+(s.year?" ("+esc(s.year)+")":"")+". "+esc(s.title)+". "+esc(s.journal_or_publisher)+(F(r,"location")?", "+esc(F(r,"location")):"")+"</p>";
   if(m.definition)h+='<p class="kv"><b>정의</b> '+esc(m.definition)+"</p>";
   if(F(r,"note"))h+='<p class="kv"><b>비고</b> '+esc(F(r,"note"))+"</p>";
   if(m.comparability_note)h+='<p class="kv" style="color:var(--wn)"><b style="color:var(--wn)">주의</b> '+esc(m.comparability_note)+"</p>";
@@ -378,10 +380,30 @@ function copy(tx){if(navigator.clipboard)navigator.clipboard.writeText(tx).then(
 var tmr;function toast(s){var e=$("toast");e.textContent=s;e.style.display="block";clearTimeout(tmr);tmr=setTimeout(function(){e.style.display="none"},1500)}
 
 /* ---------- views ---------- */
+function cnt(fams){var n=0;R.forEach(function(r){if(fams.indexOf((M[F(r,"metric_id")]||{}).family)>-1)n++});return n}
+function rowLi(r){var es=!isOrig(F(r,"nature")),bits=[F(r,"n")?"n="+nf(F(r,"n")):"",F(r,"period"),sname(r)+(F(r,"location")?", "+F(r,"location"):"")].filter(Boolean).join(", ");
+  var lb=[F(r,"stage"),E(F(r,"indication"))?"":ko(F(r,"indication")),E(F(r,"segment"))?"":tr(F(r,"segment")),F(r,"stat_type")==="min"?"(하한)":F(r,"stat_type")==="max"?"(상한)":""].filter(Boolean).join(" / ")||"전체";
+  return'<div class="li" data-id="'+esc(F(r,"stat_id"))+'" data-ck=""><div>'+esc(lb)+"<small>"+esc(bits)+'</small></div><div class="r">'+esc(mm(r))+'<small><span class="bd'+(es?" es":"")+'">'+esc(natS(F(r,"nature")))+"</span></small></div></div>"}
+function mm(r){var st=F(r,"stat_type");if(st!=="min"&&st!=="max")return fmt(r);var x=parseFloat(F(r,"value")),u=F(r,"unit");return u==="fraction"?(Math.round(x*1000)/10)+"%":String(+x.toPrecision(4))+(u==="fraction"?"":" "+u)}
+function listSec(title,cap,rows){if(!rows.length)return"";rows.sort(function(a,b){return sname(a).localeCompare(sname(b))});return sec(title,cap,'<div class="lst">'+rows.map(rowLi).join("")+"</div>")}
+function byMet(mid,fn){return(BYM[mid]||[]).filter(function(r){return!fn||fn(r)})}
+function famSecs(fams){var h="";Object.keys(M).forEach(function(k){var m=M[k];if(fams.indexOf(m.family)<0)return;h+=listSec(m.name_ko,m.definition+(m.comparability_note?" 주의: "+m.comparability_note:""),byMet(k))});return h}
+function vRate(){
+  var a=byMet("DISCOUNT_RATE"),g=function(fn){return a.filter(fn)};
+  var r1=g(function(r){return/rNPV/.test(F(r,"segment"))}),r2=g(function(r){return/^NPV/.test(F(r,"segment"))}),r3=g(function(r){return/WACC|자본비용/.test(F(r,"segment"))});
+  var rest=a.filter(function(r){return r1.indexOf(r)<0&&r2.indexOf(r)<0&&r3.indexOf(r)<0});
+  return listSec("rNPV 할인율","성공확률을 현금흐름에 반영한 뒤 쓰는 할인율입니다.",r1)+listSec("NPV 할인율(프로젝트 단계별)","위험을 할인율에 반영하는 방식이라 rNPV 할인율보다 높습니다.",r2)+listSec("WACC와 자본비용","기업 또는 산업의 자본비용입니다. 기업 단계별 바이오텍 값과 대형 제약사 값을 구분하십시오.",r3)+listSec("기타 할인율","",rest)+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function vCost(){return famSecs(["개발비","임상 환자당 비용","임상 시험당 비용"])+'<p class="foot">통화 기준연도와 실패 비용, 자본비용 포함 여부가 문헌마다 다릅니다. '+esc(STAR)+"</p>"}
+function vFin(){return famSecs(["원가율","판관비율","R&D 비율","이익률","법인세율"])+'<p class="foot">'+esc(STAR)+"</p>"}
+
 function vHome(){
-  var h='<div class="tiles">';
-  [["pos","rNPV 성공확률","문헌별 단계 전이율, LOA, 기간 비교"],["dur","개발 기간","단계별 소요 기간, 허가 심사 기간"],["deal","L/O 딜 조건","선급금, 마일스톤, 로열티, 딜 규모"],["share","매출 추정","출시 순서별 점유율, 선도자 우위"]].forEach(function(t){h+='<button class="tile" data-go="'+t[0]+'"><b>'+esc(t[1])+"</b><span>"+esc(t[2])+"</span></button>"});
-  h+='</div><input class="srch" id="hq" type="search" placeholder="직접 검색: 로열티, Phase II 종양" enterkeyhint="search" autocomplete="off">';
+  var G3=[["확률과 기간",[["pos","rNPV 성공확률","문헌별 단계 전이율, LOA, 기간 비교"],["dur","개발 기간","단계별 소요 기간, 허가 심사 기간"]]],
+    ["거래와 매출",[["deal","L/O 딜 조건","선급금, 마일스톤, 로열티, 딜 규모"],["share","매출 추정","출시 순서별 점유율, 피크 도달"]]],
+    ["재무 가정",[["rate","할인율, WACC",cnt(["할인율(자본비용)"])+"건"],["cost","개발비",cnt(["개발비","임상 환자당 비용","임상 시험당 비용"])+"건, 임상비용 포함"],["fin","원가, 판관비, 세율",cnt(["원가율","판관비율","R&D 비율","이익률","법인세율"])+"건"]]]];
+  var h="";
+  G3.forEach(function(g){h+='<p class="gh3">'+esc(g[0])+'</p><div class="tiles">';g[1].forEach(function(x){h+='<button class="tile" data-go="'+x[0]+'"><b>'+esc(x[1])+"</b><span>"+esc(x[2])+"</span></button>"});h+="</div>"});
+  h+='<input class="srch" id="hq" type="search" placeholder="직접 검색: 로열티, Phase II 종양" enterkeyhint="search" autocomplete="off">';
   h+='<button class="lnk" data-go="list">그 밖의 통계 전체 목록 (종결 사유, 허가 심사 등) &#8250;</button>';
   h+='<p class="foot" style="margin-top:16px">수록 통계 '+R.length+"건, 문헌 "+Object.keys(S).length+"편. 수치는 각 문헌 원문 값을 옮긴 것이며 원문 PDF는 포함하지 않습니다. 인용 전에 원문으로 확인하십시오. 데이터 기준일 "+esc(DB.built)+".</p>";
   return h;
@@ -512,6 +534,7 @@ function vDeal(){
   }else if(k==="PULLAN2019"){
     h+=sec("치료영역당 딜 소싱 깔때기 (Pullan p.6)","대형 제약사의 대략적 건수(typical breakdown)입니다.",tbl(["단계","건수"],sel("PULLAN_FUNNEL").map(function(r){return[F(r,"segment"),cell(r)]})));
   }
+  h+=listSec("기타 문헌의 선급금 비중","",byMet("UPFRONT_SHARE_OTHER"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"));
   return h+'<p class="foot">'+esc(STAR)+"</p>";
 }
 function vShare(){
@@ -524,6 +547,8 @@ function vShare(){
   h+=sec("Ridley 2015 요약통계 (Table S2)","평균값입니다. 시간차 단위는 분기.",tbl(["진입 순서","피크","판촉 점유율","직전 대비 시간차"],rs));
   var cd=sel("MCK_ADV_COND").map(function(r){var s=F(r,"segment").split(" = ");return[s[0]+": "+(s[1]||"").replace(/\s*\(.*\)$/,""),cell(r)]});
   h+=sec("조건별 선도자 우위 (McKinsey Exhibit 3)","단위 %p.",tbl(["조건","우위"],cd));
+  h+=listSec("기타 문헌의 진입 순서별 점유율","McKinsey, Ridley와 정의가 다릅니다.",byMet("SHARE_ORDER_OTHER"));
+  h+=listSec("출시 후 피크 도달 기간","",byMet("LAUNCH_CURVE").concat(byMet("PEAK_TIMING_MODEL")));
   h+=sec("시대별 선도자 우위 (McKinsey 본문)","",tbl(["구분","우위"],sel("MCK_ADV_ERA").map(function(r){return[F(r,"period")||F(r,"segment"),cell(r)]})),STAR);
   return h;
 }
@@ -622,18 +647,18 @@ function autoCk(r){
   return"";
 }
 /* ---------- router ---------- */
-var TT={"":"벤치마크 조회",pos:"rNPV 성공확률",dur:"개발 기간",deal:"L/O 딜 조건",share:"매출 추정",list:"통계 전체 목록",search:"검색"};
+var TT={"":"벤치마크 조회",rate:"할인율, WACC",cost:"개발비",fin:"원가, 판관비, 세율",pos:"rNPV 성공확률",dur:"개발 기간",deal:"L/O 딜 조건",share:"매출 추정",list:"통계 전체 목록",search:"검색"};
 function route(){
   if(sheetOpen)closeSheet();
   var h=location.hash.replace(/^#\/?/,""),v=h.split("?")[0];
   if(!TT.hasOwnProperty(v))v="";
   $("ttl").textContent=TT[v];$("back").style.display=v?"block":"none";
-  var html={"":vHome,pos:vPos,dur:vDur,deal:vDeal,share:vShare,list:vList,search:vSearch}[v]();
+  var html={"":vHome,rate:vRate,cost:vCost,fin:vFin,pos:vPos,dur:vDur,deal:vDeal,share:vShare,list:vList,search:vSearch}[v]();
   $("view").innerHTML=html;window.scrollTo(0,0);
   if(v==="search")initSearch();
   if(v===""){var hq=$("hq");hq.addEventListener("keydown",function(e){if(e.key==="Enter"){SQ={q:hq.value,f:"",sc:"",og:false};location.hash="search"}})}
 }
-function rerender(){var y=window.scrollY;$("view").innerHTML={pos:vPos,dur:vDur,deal:vDeal,share:vShare}[location.hash.replace(/^#\/?/,"")]();window.scrollTo(0,y)}
+function rerender(){var y=window.scrollY;$("view").innerHTML={rate:vRate,cost:vCost,fin:vFin,pos:vPos,dur:vDur,deal:vDeal,share:vShare}[location.hash.replace(/^#\/?/,"")]();window.scrollTo(0,y)}
 $("back").addEventListener("click",function(){if(history.length>1)history.back();else location.hash=""});
 $("view").addEventListener("click",function(e){
   var t=e.target,b;
