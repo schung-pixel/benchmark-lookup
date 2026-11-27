@@ -20,8 +20,8 @@ header h1{font-size:17px;font-weight:500;margin:0;flex:1}
 #srbtn{border:.5px solid var(--bd2);background:var(--card);color:var(--tx);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #srbtn svg{width:18px;height:18px}
 .subs{position:sticky;top:56px;z-index:4;background:var(--bg);padding:2px 0 8px;margin:0 0 4px;border-bottom:.5px solid var(--bd)}
-#tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:.5px solid var(--bd);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
-#tabs button{border:0;background:transparent;color:var(--tx3);font:inherit;font-size:12px;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:.5px solid var(--bd);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+#tabs button{border:0;background:transparent;color:var(--tx3);font:inherit;font-size:11.5px;white-space:nowrap;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
 #tabs button svg{width:22px;height:22px}
 #tabs button.on{color:var(--ac);font-weight:500}
 #back{display:none;border:0;background:transparent;color:var(--tx);font-size:22px;line-height:1;padding:4px 8px 4px 0;cursor:pointer}
@@ -63,6 +63,10 @@ td.na{color:var(--tx3);font-weight:400;cursor:default}
 .li small{display:block;font-size:12px;color:var(--tx2);font-weight:400}
 .bd{display:inline-block;font-size:11px;padding:1px 7px;border:.5px solid var(--bd2);border-radius:6px;color:var(--tx2);white-space:nowrap;font-weight:400}
 .bd.es{color:var(--wn);border-color:var(--wn)}
+.sd{background:var(--card);border:.5px solid var(--bd);border-radius:12px;margin:0 0 8px}
+.sd summary{padding:11px 12px;cursor:pointer;font-size:14px}
+.sd summary span{color:var(--tx3);font-size:12px}
+.sd .lst{border:0;border-top:.5px solid var(--bd);border-radius:0 0 12px 12px}
 .warn{background:var(--wnbg);color:var(--wn);border-radius:10px;padding:8px 12px;font-size:13px;margin:8px 0}
 #ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
 #sheet{display:none;position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:86vh;overflow-y:auto;background:var(--bg);border-radius:16px 16px 0 0;padding:6px 14px calc(24px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto}
@@ -99,7 +103,7 @@ label.tg{font-size:13px;color:var(--tx2);display:flex;gap:6px;align-items:center
 <div id="subs" class="subs"></div>
 <main id="view"></main>
 </div>
-<nav id="tabs" aria-label="주요 화면"><button data-tab="p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>확률, 기간</button><button data-tab="d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="M4 12h16"/></svg>딜, M&amp;A</button><button data-tab="s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M5 15l4-4 3 3 7-7"/></svg>매출</button><button data-tab="f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2"/></svg>재무</button></nav>
+<nav id="tabs" aria-label="주요 화면"><button data-tab="p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>확률</button><button data-tab="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>기간</button><button data-tab="d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="M4 12h16"/></svg>딜</button><button data-tab="s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M5 15l4-4 3 3 7-7"/></svg>매출</button><button data-tab="f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/></svg>비용, 재무</button></nav>
 <div id="ov"></div>
 <div id="sheet" role="dialog" aria-modal="true"></div>
 <div id="toast"></div>
@@ -503,6 +507,7 @@ function vDur(){
   var rv=sel("BIO2016_REVIEW_TIME").map(function(r){return[ko(F(r,"indication")),cell(r,"dur:N"),cell(one("BIO2016_REVIEW",function(x){return F(x,"indication")===F(r,"indication")&&F(x,"segment")==="1차 심사 승인"}),"trans:N"),cell(one("BIO2016_REVIEW",function(x){return F(x,"indication")===F(r,"indication")&&F(x,"segment")==="최종 승인"}),"trans:N")]});
   rv.sort(function(a,b){return a[0]==="전체"?-1:b[0]==="전체"?1:0});
   h+=sec("허가 심사 (BIO 2016)","2006-2015 최초 NDA/BLA 제출 건 기준입니다.",tbl(["적응증","기간(년)","1차 승인","최종 승인"],rv),STAR);
+  h+=srcDet("기타 문헌의 단계 기간","단위(년, 개월)와 기간 정의가 문헌마다 다릅니다.",byMet("PHASE_DURATION_OTHER"));
   return h;
 }
 var DSTG=["Research","Preclinical","Phase I","Phase II","Phase III","승인 또는 시판","Multiple stages","전체"];
@@ -537,8 +542,28 @@ function vDeal(){
     h+=sec("치료영역당 딜 소싱 깔때기 (Pullan p.6)","대형 제약사의 대략적 건수(typical breakdown)입니다.",tbl(["단계","건수"],sel("PULLAN_FUNNEL").map(function(r){return[F(r,"segment"),cell(r)]})));
   }
   var lic=byMet("UPFRONT_SHARE_OTHER").filter(function(r){return!/M&A/.test(F(r,"segment"))});
-  h+=listSec("기타 문헌의 평균 선급금","USD m. 빅파마와 중소기업 도입을 구분한 O'Connell 2014 등입니다.",byMet("UPFRONT_AMOUNT_OTHER"))+listSec("기타 문헌의 선급금 비중","",lic)+listSec("라이선서와 라이선시 가치 배분","",byMet("VALUE_SPLIT"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"));
+  h+=listSec("기타 문헌의 평균 선급금","USD m. 빅파마와 중소기업 도입을 구분한 O'Connell 2014 등입니다.",byMet("UPFRONT_AMOUNT_OTHER"))+listSec("기타 문헌의 선급금 비중","",lic)+listSec("라이선서와 라이선시 가치 배분","",byMet("VALUE_SPLIT"))+listSec("라이선스 거래 시점","",byMet("DEAL_TIMING"))+srcDet("공개 선급금 합계(단계별)","Biotechgate 2020, 연도와 단계별 공개 선급금 합계입니다.",byMet("BTG_UPFRONT_BYSTAGE"));
   return h+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function srcDet(title,cap,rows){
+  if(!rows.length)return"";var by={},ord=[];
+  rows.forEach(function(r){var k=sname(r);if(!by[k]){by[k]=[];ord.push(k)}by[k].push(r)});
+  ord.sort(function(a,b){return a.localeCompare(b)});
+  return sec(title,cap,ord.map(function(k){return'<details class="sd"><summary>'+esc(k)+' <span>'+by[k].length+"건</span></summary>"+'<div class="lst">'+by[k].map(rowLi).join("")+"</div></details>"}).join(""));
+}
+function bm(ids){var a=[];ids.forEach(function(k){a=a.concat(byMet(k))});return a}
+function vPosEtc(){
+  var h='<p class="cap" style="margin-top:8px">BIO 비교표 밖의 문헌별 성공률입니다. 문헌을 누르면 펼쳐지고, 값을 누르면 정의와 출처가 나옵니다.</p>';
+  h+=srcDet("단계 성공률","단계 진입 후 다음 단계로 넘어갈 확률입니다.",bm(["HAY_POS","WONG_POS","DIMASI2010_POS","TAKEBE_POS","SERTKAYA_TRANS","GLOBALDATA_ONC","FDA_MOVE","POS_OTHER","COOK_STAGE_SUCCESS","COOK_BACKUP","DOWDEN_LATE","MORGAN_LEAD_TRANSITION"]));
+  h+=srcDet("LOA와 누적 성공확률","해당 단계에서 승인까지 갈 확률입니다.",bm(["LOA_OTHER","PAUL_CUM","COOK_CUM","MORGAN_CUM"]));
+  h+=srcDet("치료영역별, 바이오마커별","",bm(["DOWDEN_AREA","WONG_BIOMARKER"]));
+  return h+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function vFail(){
+  return famSecs(["종결 사유(비중)","종결 사유(건수)","개발 중단 사유(비중)","종결 비율","단계 소모율","후보 현황(최고 도달 단계별)","프로젝트 결과(PoM별)"])+'<p class="foot">'+esc(STAR)+"</p>";
+}
+function vPred(){
+  return famSecs(["성공 예측인자별 진행률","확률 분해 예시","ML 예측 구간별 실제 승인률","예측 특성 중요도","인체 PK 예측 정확도"])+'<p class="foot">'+esc(STAR)+"</p>";
 }
 function vMA(){
   var STG=[["Preclinical","전임상"],["Phase I","1상"],["Phase II","2상"],["Phase III","3상"],["Approved","승인"]];
@@ -557,6 +582,7 @@ function vMA(){
 function vFc(){
   var h=listSec("출시 후 피크 도달 기간","",byMet("LAUNCH_CURVE").concat(byMet("PEAK_TIMING_MODEL")));
   h+=listSec("출시 연차별 피크 대비 매출","",byMet("LAUNCH_SHARE_PEAK"));
+  h+=famSecs(["회귀계수(피크 점유율)","모형 적합도"]);
   h+=listSec("매출 예측 오차 (Cha 2013)","컨센서스 피크 매출 추정과 실제 피크의 차이입니다. 매출 민감도 범위의 근거로 쓸 수 있습니다.",byMet("FORECAST_ERROR"));
   return h+'<p class="foot">'+esc(STAR)+"</p>";
 }
@@ -669,7 +695,7 @@ function autoCk(r){
   return"";
 }
 /* ---------- router ---------- */
-var TABS={p:["확률과 기간",[["pos","성공확률"],["dur","개발 기간"]]],d:["딜과 M&A",[["deal","라이선스 딜"],["ma","M&A, 투자 수익률"]]],s:["매출 추정",[["share","출시 순서 점유율"],["fc","출시 곡선, 예측 오차"]]],f:["재무 가정",[["rate","할인율, WACC"],["cost","개발비"],["fin","원가, 판관비, 세율"]]]};
+var TABS={p:["성공확률",[["pos","BIO 비교표"],["pose","문헌별 성공률"],["fail","실패 원인"],["pred","예측 연구"]]],t:["개발 기간",[["dur","단계와 심사 기간"]]],d:["딜과 M&A",[["deal","라이선스 조건"],["ma","M&A, 투자 수익률"]]],s:["매출 추정",[["share","출시 순서 점유율"],["fc","출시 곡선, 예측"]]],f:["비용과 재무",[["rate","할인율, WACC"],["cost","개발비"],["fin","원가, 판관비, 세율"]]]};
 var V2T={};Object.keys(TABS).forEach(function(t){TABS[t][1].forEach(function(x){V2T[x[0]]=t})});
 var TT={list:"통계 전체 목록",search:"검색과 정보"};Object.keys(TABS).forEach(function(t){TABS[t][1].forEach(function(x){TT[x[0]]=TABS[t][0]})});
 var VIEWS;
@@ -677,7 +703,7 @@ function lastOf(t){try{var v=localStorage.getItem("bm_tab_"+t);if(v&&V2T[v]===t)
 function route(){
   if(sheetOpen)closeSheet();
   var h=location.hash.replace(/^#\/?/,""),v=h.split("?")[0];
-  VIEWS=VIEWS||{rate:vRate,cost:vCost,fin:vFin,pos:vPos,dur:vDur,deal:vDeal,ma:vMA,share:vShare,fc:vFc,list:vList,search:vSearch};
+  VIEWS=VIEWS||{rate:vRate,cost:vCost,fin:vFin,pos:vPos,pose:vPosEtc,fail:vFail,pred:vPred,dur:vDur,deal:vDeal,ma:vMA,share:vShare,fc:vFc,list:vList,search:vSearch};
   if(!TT.hasOwnProperty(v)){var lt="p";try{lt=localStorage.getItem("bm_last_tab")||"p"}catch(e){}if(!TABS[lt])lt="p";location.replace("#"+lastOf(lt));return}
   var t=V2T[v]||"";
   $("ttl").textContent=TT[v];$("back").style.display=t?"none":"block";$("srbtn").style.display=t?"flex":"none";
